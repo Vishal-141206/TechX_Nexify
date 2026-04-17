@@ -69,6 +69,20 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     return value as Record<string, unknown>;
 }
 
+function formatAdvice(text: string) {
+    if (!text) return null;
+    return text.split(/(\*\*.*?\*\*)/g).map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+            return (
+                <strong key={i} className="bg-yellow-200/80 font-bold text-black px-1.5 py-0.5 rounded border border-yellow-400">
+                    {part.slice(2, -2)}
+                </strong>
+            );
+        }
+        return <span key={i}>{part}</span>;
+    });
+}
+
 function parseOptionalNumber(value: unknown): number | null {
     if (typeof value === "number") {
         return Number.isFinite(value) ? value : null;
@@ -232,6 +246,7 @@ export default function AnalyzePage() {
         setAnalysisStepIndex(0);
         setAnalysisProgress(10);
         setIsLoading(true);
+        setAnalysis(null);
         let isSuccess = false;
 
         try {
@@ -481,9 +496,9 @@ export default function AnalyzePage() {
             </div>
 
             {analysis ? (
-                <section className="mt-6 grid gap-5 lg:grid-cols-3">
+                <section className="mt-6 flex flex-col gap-6">
                     <motion.article
-                        className="glass rounded-3xl p-6"
+                        className="glass rounded-3xl p-6 hover:-translate-y-1 hover:shadow-xl hover:border-black/20 hover:bg-white/40 transition-all duration-300 relative overflow-hidden group"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.25 }}
@@ -529,7 +544,7 @@ export default function AnalyzePage() {
                     </motion.article>
 
                     <motion.article
-                        className="glass rounded-3xl p-6"
+                        className="glass rounded-3xl p-6 hover:-translate-y-1 hover:shadow-xl hover:border-black/20 hover:bg-white/40 transition-all duration-300 relative overflow-hidden group"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35 }}
@@ -599,7 +614,7 @@ export default function AnalyzePage() {
                     </motion.article>
 
                     <motion.article
-                        className="glass rounded-3xl p-6"
+                        className="glass rounded-3xl p-6 hover:-translate-y-1 hover:shadow-xl hover:border-black/20 hover:bg-white/40 transition-all duration-300 relative overflow-hidden group"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.45 }}
@@ -612,7 +627,7 @@ export default function AnalyzePage() {
                                     <Bot size={18} />
                                 </div>
                                 <p className="whitespace-pre-line text-sm leading-6 text-gray-700">
-                                    {analysis.ai_advice}
+                                    {formatAdvice(analysis.ai_advice)}
                                 </p>
                             </div>
                             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-black/5 px-3 py-1 text-xs text-gray-600">
