@@ -1,12 +1,12 @@
-#  CarSure AI
+# CarSure AI
 
-### AI-Powered Used Car Risk Assessment, Fraud Detection & Buying Advisor
+### AI-Powered Car Risk Assessment, Decision System & Buying Advisor
 
-> **One intelligent platform to evaluate any used car before you buy it.**
+> **One intelligent platform to evaluate any car before you buy it — used or brand new.**
 
 ---
 
-##  Problem
+## Problem
 
 Buying a used car in India is a gamble:
 
@@ -19,132 +19,156 @@ Buying a used car in India is a gamble:
 
 ---
 
-##  Solution
+## Solution
 
-**CarSure AI** gives you two powerful tools: an **AI Car Analyzer** to run diagnostics on a specific vehicle and an **AI Buying Assistant** to recommend the absolute best cars for your budget and lifestyle. 
+**CarSure AI** gives you two powerful tools:
+
+1. **AI Car Analyzer** — Run rigorous diagnostics on a specific used vehicle (price prediction, risk scoring, fraud detection, AI advisor).
+2. **AI Decision Dashboard** — Tell us your budget, lifestyle, and preferences. The system recommends the best cars, scores them across Fit/Risk/Sentiment, explains why the best wins, why others lose, and quantifies its own confidence.
+
+Supports both **used cars** (ML-predicted pricing + risk scoring) and **brand new cars** (LLM showroom pricing + zero-risk baseline).
 
 No guesswork. No assumptions. Just data.
 
 ---
 
-##  Key Features
+## Key Features
 
 | Feature | Description |
 |---|---|
-|  **ML Price Prediction** | Trained model predicts fair market price range based on year, mileage, engine, fuel type, transmission, and ownership |
-|  **Risk Scoring Engine** | 0–10 score evaluating age, usage patterns, ownership history, and mechanical indicators |
-|  **Fraud Detection** | Detects odometer tampering, suspicious data combinations, and "too perfect" seller profiles |
-|  **Data Confidence Rating** | Tells you how trustworthy the submitted data is — High / Medium / Low |
-|  **Dual Architecture** | Supports both single-vehicle diagnostics (`/analyze`) and a structured decision system (`/assistant`) |
-|  **Decision System** | Best Choice with comparative `why_this_wins`, `trade_offs`, and a numeric `decision_confidence` score |
-|  **Sentiment Humanization** | HuggingFace RoBERTa scores mapped to human labels: Positive 👍 / Neutral ⚖️ / Risk ⚠️ |
-|  **Why-Not Engine** | LLM-generated rejection reasons for every non-winning car, referencing risk, sentiment, and user profile mismatch |
-|  **Community Insights** | Scrapes `r/CarsIndia`, quantifies sentiment via `roberta-base-sentiment`, and extracts strict JSON `pros`, `cons`, `top_issue`, and `verdict` |
+| **ML Price Prediction** | Trained model predicts fair market price range based on year, mileage, engine, fuel type, transmission, and ownership |
+| **Risk Scoring Engine** | 0-10 score evaluating age, usage patterns, ownership history, and mechanical indicators |
+| **Fraud Detection** | Detects odometer tampering, suspicious data combinations, and "too perfect" seller profiles |
+| **Data Confidence Rating** | Tells you how trustworthy the submitted data is — High / Medium / Low |
+| **Dual Architecture** | Supports both single-vehicle diagnostics (`/analyze`) and a structured decision system (`/assistant`) |
+| **Used vs New Toggle** | User selects car condition; used cars go through ML pricing + risk engine, new cars use LLM showroom pricing with zero risk |
+| **Decision System** | Best Choice with comparative `why_this_wins`, `trade_offs`, and a numeric `decision_confidence` score |
+| **Sentiment Humanization** | HuggingFace RoBERTa scores mapped to human labels: Positive / Neutral / Risk |
+| **Why-Not Engine** | LLM-generated rejection reasons for every non-winning car, referencing risk, sentiment, and user profile mismatch |
+| **Community Insights** | Scrapes `r/CarsIndia`, quantifies sentiment via `roberta-base-sentiment`, and extracts strict JSON `pros`, `cons`, `top_issue`, and `verdict` |
 
 ---
 
-##  Architecture
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Next.js Frontend                  │
-│  Cinematic scroll landing → Full analysis form →    │
-│  Analysis Card + Verification Card + AI Advisor     │
-└──────────────────────┬──────────────────────────────┘
-                       │ POST /analyze
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│                  FastAPI Backend                     │
-│                                                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐  │
-│  │ ML Predictor │  │ Risk Engine  │  │ Reddit API│  │
-│  │ (price_model │  │ (fraud,risk, │  │ (scraper) │  │
-│  │   .pkl)      │  │  confidence) │  │           │  │
-│  └──────┬───────┘  └──────┬───────┘  └─────┬──────┘  │
-│         │                 │                │         │
-│         └────────┬────────┘────────────────┘         │
-│                  ▼                                   │
-│         ┌──────────────┐                             │
-│         │  AI Advisor  │  Groq LLM (llama-3.3-70b)  │
-│         │  + Fallback  │  Rule-based if API fails    │
-│         └──────────────┘                             │
-└─────────────────────────────────────────────────────┘
++-----------------------------------------------------+
+|                   Next.js Frontend                   |
+|  Cinematic scroll landing  ->  Analyze Car form      |
+|  Decision Dashboard  ->  Comparison + Why-Not Grid   |
++------------------------+----------------------------+
+                         | POST /analyze
+                         | POST /assistant
+                         v
++-----------------------------------------------------+
+|                  FastAPI Backend                      |
+|                                                      |
+|  +--------------+  +--------------+  +------------+  |
+|  | ML Predictor |  | Risk Engine  |  | Reddit API |  |
+|  | (price_model |  | (fraud,risk, |  | (scraper)  |  |
+|  |   .pkl)      |  |  confidence) |  |            |  |
+|  +------+-------+  +------+-------+  +-----+------+  |
+|         |                 |               |           |
+|         +--------+--------+---------------+           |
+|                  v                                    |
+|  +--------------+  +--------------+  +-------------+ |
+|  |  AI Advisor  |  |  Sentiment   |  | Why-Not     | |
+|  |  Groq LLM    |  |  HuggingFace |  | Engine      | |
+|  +--------------+  +--------------+  +-------------+ |
++-----------------------------------------------------+
 ```
 
 ---
 
-##  How It Works
+## How It Works
 
-1. **User enters car details** — year, mileage (km/l), engine CC, owner count, fuel type, transmission, vehicle number (optional)
+### Analyze Car (Single Vehicle Diagnostics)
+
+1. **User enters car details** — year, mileage (km/l), engine CC, owner count, fuel type, transmission
 2. **ML model predicts price** — trained scikit-learn model outputs estimated market value
 3. **Risk engine scores the car** — evaluates 10+ risk factors and flags fraud patterns
-4. **Verification engine cross-checks** — matches seller claims against official vehicle records
-5. **AI Advisor generates recommendation** — LLM synthesizes all signals into a 4-line buying recommendation
-6. **Frontend displays results** — Analysis Card, Verification Card, and AI Advisor Card
+4. **AI Advisor generates recommendation** — LLM synthesizes all signals into a concise buying recommendation
+
+### Decision Dashboard (Multi-Car Buying Assistant)
+
+1. **User selects car condition** — Used Car or Brand New Car
+2. **User enters preferences** — budget, usage, family size, priority, fuel preference
+3. **LLM recommends 3 cars** — tailored to the user's exact profile with fit scores
+4. **For used cars**: ML model predicts price + risk engine scores each car
+5. **For new cars**: LLM provides showroom/on-road pricing, risk is set to 0
+6. **Sentiment engine scores community feedback** — HuggingFace RoBERTa analyzes Reddit discussions
+7. **Decision block selects the best car** — using `fit_score - risk_score` ranking
+8. **Why-Not engine explains rejections** — 1-2 reasons per non-winning car
+9. **Confidence score computed** — `0.5 * fit + 0.3 * sentiment + 0.2 * (100 - risk * 10)`
 
 ---
 
-##  Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | Next.js 16, React 19, Tailwind CSS, Framer Motion |
+| **Frontend** | Next.js 16, React 19, Tailwind CSS, Framer Motion, Plus Jakarta Sans |
 | **Backend API** | Python, FastAPI, Uvicorn |
 | **ML Model** | scikit-learn (trained price prediction model) |
 | **AI Advisor** | Groq API (LLaMA 3.3 70B Versatile) with fail-safe |
-| **Verification** | Mock engine + pluggable external API support |
+| **Sentiment** | HuggingFace Inference API (cardiffnlp/twitter-roberta-base-sentiment) |
+| **Reddit Scraping** | Reddit JSON API with Groq-powered structured summarization |
 | **Data Processing** | pandas, NumPy, joblib |
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```
 CarSure/
-├── backend/
-│   ├── main.py                    # FastAPI app with /analyze endpoint
-│   ├── model/
-│   │   ├── predictor.py           # ML price prediction
-│   │   └── price_model.pkl        # Trained model
-│   ├── services/
-│   │   ├── analysis.py            # Main orchestrator
-│   │   ├── risk_engine.py         # Risk scoring + fraud detection
-│   │   ├── verification.py        # Vehicle record verification
-│   │   └── ai_advisor.py          # LLM + rule-based advisor
-│   ├── utils/
-│   │   └── formatter.py           # Price formatting
-│   └── requirements.txt
-│
-├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── page.tsx           # Home (cinematic scroll landing)
-│   │   │   ├── analyze/page.tsx   # Full analysis form + results
-│   │   │   └── layout.tsx
-│   │   └── components/
-│   │       └── carsure/
-│   │           └── home-experience.tsx
-│   ├── package.json
-│   └── tailwind.config.js
-│
-└── README.md
++-- backend/
+|   +-- main.py                    # FastAPI app with /analyze and /assistant endpoints
+|   +-- model/
+|   |   +-- predictor.py           # ML price prediction
+|   |   +-- price_model.pkl        # Trained model
+|   +-- services/
+|   |   +-- analysis.py            # Main orchestrator (analyze_car + run_assistant_pipeline)
+|   |   +-- risk_engine.py         # Risk scoring + fraud detection
+|   |   +-- recommendation.py      # LLM-powered car recommendation engine
+|   |   +-- reddit_service.py      # Reddit scraper + Groq summarizer
+|   |   +-- sentiment.py           # HuggingFace sentiment analysis
+|   |   +-- ai_advisor.py          # LLM + rule-based advisor
+|   +-- utils/
+|   |   +-- formatter.py           # Price formatting
+|   +-- requirements.txt
+|
++-- frontend/
+|   +-- src/
+|   |   +-- app/
+|   |   |   +-- page.tsx           # Home (cinematic scroll landing)
+|   |   |   +-- analyze/page.tsx   # Single vehicle diagnostic form + results
+|   |   |   +-- assistant/page.tsx # Decision Dashboard (multi-car comparison)
+|   |   |   +-- layout.tsx         # Root layout with Plus Jakarta Sans font
+|   |   +-- components/
+|   |       +-- carsure/
+|   |           +-- home-experience.tsx
+|   +-- package.json
+|   +-- tailwind.config.js
+|
++-- README.md
 ```
 
 ---
 
-##  Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - Python 3.10+
 - Node.js 18+
-- (Optional) Groq API key for LLM-powered advisor
+- Groq API key (required for LLM advisor, recommendations, and why-not engine)
 
 ### Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
+export GROQ_API_KEY="your_groq_api_key"
 uvicorn main:app --reload
 ```
 
@@ -160,22 +184,13 @@ npm run dev
 
 Frontend runs at `http://localhost:3000`
 
-### Environment Variables (Optional)
-
-```bash
-# For LLM-powered AI advisor (falls back to rule-based if not set)
-export GROQ_API_KEY="your_groq_api_key"
-
-# For real vehicle verification API (uses mock data if not set)
-export VEHICLE_VERIFICATION_API_URL="https://api.example.com/verify"
-export VEHICLE_VERIFICATION_API_KEY="your_api_key"
-```
-
 ---
 
-##  API Reference
+## API Reference
 
-### `POST /analyze`
+### POST /analyze
+
+Single-vehicle diagnostic endpoint.
 
 **Request:**
 ```json
@@ -185,40 +200,69 @@ export VEHICLE_VERIFICATION_API_KEY="your_api_key"
   "engine_cc": 1497,
   "owner_count": 2,
   "fuel_type": "Diesel",
-  "transmission": "Manual",
-  "vehicle_number": "DL01AB1234"
+  "transmission": "Manual"
 }
 ```
 
 **Response:**
 ```json
 {
-  "price_range": "₹5.5L - ₹6.5L",
+  "price_range": "5.5L - 6.5L",
   "risk_score": 5,
   "fraud_detected": false,
   "hidden_damage": false,
   "data_confidence": "High",
-  "recommendation": "Risky ⚠️",
-  "reasons": [
-    "Vehicle age may lead to increased wear and reduced reliability"
-  ],
-  "verification": {
-    "status": "Verified",
-    "details": {
-      "owner_count": 2,
-      "registration_year": 2019,
-      "fuel_type": "Diesel",
-      "challan_count": 1,
-      "accident_history": "Not Available"
-    }
+  "recommendation": "Risky",
+  "reasons": ["Vehicle age may lead to increased wear"],
+  "ai_advice": "Price estimate is 5.5L-6.5L with a risk score of 5/10..."
+}
+```
+
+### POST /assistant
+
+Multi-car decision dashboard endpoint.
+
+**Request:**
+```json
+{
+  "budget": 1000000,
+  "usage": "city",
+  "monthly_km": 500,
+  "priority": "comfort",
+  "family_size": 4,
+  "fuel_preference": "none",
+  "car_condition": "used"
+}
+```
+
+**Response:**
+```json
+{
+  "best_choice": {
+    "car": "Hyundai Verna",
+    "fit_score": 95,
+    "risk_score": 3,
+    "price_range": "6.5L - 7.5L",
+    "sentiment": { "score": 78, "label": "Positive" },
+    "why_this_wins": ["Best match for city + family usage", "Lower ownership cost"],
+    "trade_offs": ["High infotainment replacement cost"]
   },
-  "ai_advice": "**Hyundai Venue**:\nPrice estimate is ₹5.5L-₹6.5L with a risk score of 5/10.\nVerification: Verified. Fraud: not detected.\nNo major red flags; a standard pre-purchase inspection is advised.\nRecommendation: Risky ⚠️"
+  "comparisons": [
+    { "car": "Hyundai Verna", "fit_score": 95, "risk_score": 3, "sentiment": { "score": 78, "label": "Positive" }, "top_issue": "..." }
+  ],
+  "why_not": [
+    { "car": "Honda City", "reasons": ["Lower fit for comfort usage", "Mixed CVT feedback"] }
+  ],
+  "community_insights": [
+    { "car": "Hyundai Verna", "pros": ["...", "..."], "cons": ["...", "..."], "verdict": "..." }
+  ],
+  "decision_confidence": 87
 }
 ```
 
 ---
 
-## 🧪 Risk Engine Logic
+## Risk Engine Logic
 
 | Factor | Risk Impact | Confidence Impact |
 |---|---|---|
@@ -227,23 +271,22 @@ export VEHICLE_VERIFICATION_API_KEY="your_api_key"
 | Vehicle age > 12 years | +3 risk | -10% confidence |
 | 5+ owners | +3 risk | -15% confidence |
 | Engine >3000cc with low efficiency | +2 risk, damage flag | -10% confidence |
-| Diesel with mileage < 12 | +1 risk | — |
+| Diesel with mileage < 12 | +1 risk | -- |
 | Old EV (>8 years) | +2 risk | -10% confidence |
-| Verification mismatch | +2-3 risk, fraud flag | — |
 
 ---
 
-##  Future Scope
+## Future Scope
 
--  Integration with RTO & insurance APIs for real-time verification
--  Computer vision for physical damage detection from images
--  Real-time market price comparison across platforms
--  Blockchain-based tamper-proof vehicle history
--  Mobile app with camera-based VIN scanning
+- Integration with RTO and insurance APIs for real-time verification
+- Computer vision for physical damage detection from images
+- Real-time market price comparison across platforms
+- Blockchain-based tamper-proof vehicle history
+- Mobile app with camera-based VIN scanning
 
 ---
 
-##  Impact
+## Impact
 
 - **Prevents financial loss** — buyers avoid overpriced or fraudulent cars
 - **Builds market trust** — transparent, data-driven assessments
@@ -252,10 +295,10 @@ export VEHICLE_VERIFICATION_API_KEY="your_api_key"
 
 ---
 
-##  Team — TechX Nexify
+## Team — TechX Nexify
 
-Built for hackathon with ❤️
+Built for hackathon.
 
 ---
 
-*CarSure AI transforms used car buying from guesswork to data-driven decisions — making the process safer, smarter, and more transparent.*
+*CarSure AI transforms car buying from guesswork to data-driven decisions — making the process safer, smarter, and more transparent.*
