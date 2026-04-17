@@ -1,18 +1,20 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     AlertTriangle,
     Car,
     ChevronDown,
-    Eye,
+    Gauge,
     History,
     LayoutDashboard,
     Settings,
     ShieldAlert,
-    TrendingUp,
+    ShieldCheck,
+    Sparkles,
     WandSparkles,
     type LucideIcon,
 } from "lucide-react";
@@ -54,19 +56,19 @@ const storyFrames: StoryFrame[] = [
         step: "03",
     },
     {
-        title: "Condition Pattern Detection",
-        subtitle: "AI maps risk hotspots from declared condition and history patterns.",
-        detail: "CarSure highlights possible wear severity areas by combining ownership, mileage, and risk signals.",
-        badge: "Condition Analysis",
-        Icon: Eye,
+        title: "Vehicle Verification Engine",
+        subtitle: "Cross-check ownership, challans, and registration data against official records.",
+        detail: "CarSure verifies seller claims by matching submitted details with government registration and challan databases.",
+        badge: "Verification",
+        Icon: ShieldCheck,
         step: "04",
     },
     {
-        title: "Predict Future Maintenance Cost",
-        subtitle: "Get projected service ranges and category-level breakdowns.",
-        detail: "Based on the vehicle's age, mileage, and condition data, CarSure projects upcoming maintenance costs.",
-        badge: "Cost Prediction",
-        Icon: TrendingUp,
+        title: "AI-Powered Buying Advisor",
+        subtitle: "Get a clear, data-driven recommendation on whether to proceed.",
+        detail: "Our AI advisor synthesizes pricing, risk, fraud, and verification signals into a concise buying recommendation.",
+        badge: "AI Advisor",
+        Icon: Sparkles,
         step: "05",
     },
     {
@@ -79,62 +81,10 @@ const storyFrames: StoryFrame[] = [
     },
 ];
 
-/* ─────────────────────── Risk Ring ─────────────────────── */
-
-function RiskRing({ value }: { value: number }) {
-    const radius = 52;
-    const circumference = 2 * Math.PI * radius;
-    const dashOffset = circumference - (value / 100) * circumference;
-    const status = value < 40 ? "Safe" : value < 70 ? "Risky" : "Avoid";
-    const color = value < 40 ? "#38b000" : value < 70 ? "#f5b700" : "#ff4d4d";
-
-    return (
-        <div className="glass rounded-2xl p-5">
-            <h3 className="text-lg font-semibold text-black">Risk Score</h3>
-            <div className="mt-3 flex items-center gap-5">
-                <svg width="124" height="124" viewBox="0 0 124 124" className="-rotate-90">
-                    <circle cx="62" cy="62" r={radius} stroke="rgba(0,0,0,0.1)" strokeWidth="12" fill="none" />
-                    <circle cx="62" cy="62" r={radius} stroke={color} strokeWidth="12" fill="none" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset} />
-                </svg>
-                <div>
-                    <div className="text-4xl font-bold text-black">{value}</div>
-                    <div className="text-sm text-gray-500">{status}</div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-/* ─────────────────────── Dashboard Section ─────────────────────── */
-
 /* ─────────────────────── Combined App Section ─────────────────────── */
-
-function AnalysisField({ label, placeholder }: { label: string; placeholder: string }) {
-    return (
-        <label className="block">
-            <span className="mb-2 block text-sm text-gray-500">{label}</span>
-            <input placeholder={placeholder} className="w-full rounded-xl border border-black/15 bg-gray-50 px-4 py-3 text-sm text-black outline-none ring-black/10 transition placeholder:text-gray-400 focus:ring" />
-        </label>
-    );
-}
 
 function AppSection() {
     const [activeTab, setActiveTab] = useState<"analyze" | "dashboard">("analyze");
-    const [isLoading, setIsLoading] = useState(false);
-
-    const onRunAnalysis = () => {
-        setIsLoading(true);
-        setTimeout(() => setIsLoading(false), 2600);
-    };
-
-    const hotspots = useMemo(
-        () => [
-            { id: "Front Bumper", x: "22%", y: "48%", severity: "Medium" },
-            { id: "Rear Door", x: "62%", y: "38%", severity: "High" },
-            { id: "Wheel Arch", x: "72%", y: "67%", severity: "Low" },
-        ],
-        [],
-    );
 
     return (
         <section id="app-section" className="mx-auto mt-20 max-w-7xl px-5 pb-20">
@@ -163,117 +113,84 @@ function AppSection() {
                 <main className="space-y-4">
                     {activeTab === "analyze" ? (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-                            <div className="glass rounded-2xl p-5">
+                            <div className="glass rounded-2xl p-6 text-center">
+                                <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-black/10 bg-black/[0.03]">
+                                    <WandSparkles size={28} className="text-black/50" />
+                                </div>
                                 <h3 className="section-title text-2xl font-semibold text-black">Analyze Car</h3>
-                                <p className="mt-1 text-sm text-gray-500">Enter vehicle details to run the CarSure AI pipeline.</p>
-
-                                <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
-                                    <div className="grid gap-4 md:grid-cols-2">
-                                        <AnalysisField label="Model" placeholder="e.g. Hyundai Creta SX" />
-                                        <AnalysisField label="Year" placeholder="e.g. 2019" />
-                                        <AnalysisField label="Kilometers Driven" placeholder="e.g. 68200" />
-                                        <AnalysisField label="Fuel Type" placeholder="Diesel / Petrol / EV" />
-                                    </div>
-
-                                    <button type="button" onClick={onRunAnalysis} className="ml-auto mr-0 block rounded-xl bg-black px-5 py-2.5 font-semibold text-white transition hover:bg-gray-800">
-                                        Run AI Analysis
-                                    </button>
-                                </form>
+                                <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
+                                    Enter full vehicle details — year, mileage, engine CC, owner count, fuel type,
+                                    transmission, and vehicle number — to get AI-powered pricing, risk scoring,
+                                    fraud detection, verification, and a buying recommendation.
+                                </p>
+                                <Link
+                                    href="/analyze"
+                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:bg-gray-800"
+                                >
+                                    <WandSparkles size={16} />
+                                    Start Full Analysis
+                                </Link>
                             </div>
 
-                            <div className="glass relative overflow-hidden rounded-2xl p-5">
-                                <h3 className="section-title text-xl font-semibold text-black">Live Analysis Status</h3>
-                                <p className="mt-1 text-sm text-gray-500">Realtime diagnostic stream from CarSure AI</p>
-                                <div className="relative mt-4 h-48 rounded-2xl border border-black/10 bg-gray-50">
-                                    {isLoading && <div className="scan-line absolute inset-0" />}
-                                    <div className="absolute inset-0 grid place-items-center text-center">
-                                        <motion.div
-                                            animate={isLoading ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-                                            transition={{ repeat: isLoading ? Infinity : 0, duration: 1.3 }}
-                                        >
-                                            <p className="text-xl font-semibold text-black">{isLoading ? "Analyzing vehicle..." : "Ready for analysis"}</p>
-                                            <p className="mt-2 text-sm text-gray-400">{isLoading ? "Scanning risk and odometer patterns" : "Enter data and click Run AI Analysis to start"}</p>
-                                        </motion.div>
-                                    </div>
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <div className="glass rounded-2xl p-5">
+                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 1</p>
+                                    <p className="mt-2 text-sm font-semibold text-black">Enter Vehicle Details</p>
+                                    <p className="mt-1 text-xs text-gray-500">Year, mileage, engine CC, owners, fuel type, transmission</p>
+                                </div>
+                                <div className="glass rounded-2xl p-5">
+                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 2</p>
+                                    <p className="mt-2 text-sm font-semibold text-black">AI Runs Analysis</p>
+                                    <p className="mt-1 text-xs text-gray-500">Price prediction, risk scoring, fraud detection, and verification</p>
+                                </div>
+                                <div className="glass rounded-2xl p-5">
+                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 3</p>
+                                    <p className="mt-2 text-sm font-semibold text-black">Get AI Recommendation</p>
+                                    <p className="mt-1 text-xs text-gray-500">Clear buying advice based on all analysis and verification data</p>
                                 </div>
                             </div>
                         </div>
                     ) : (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-                            <div className="glass flex flex-col gap-3 rounded-2xl p-5 md:flex-row md:items-center md:justify-between">
-                                <div>
-                                    <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Current Vehicle</p>
-                                    <h3 className="section-title mt-1 text-2xl font-semibold text-black">2019 Hyundai Creta SX(O)</h3>
-                                    <p className="text-sm text-gray-500">Diesel • 68,200 km • 2nd Owner • DL Registration</p>
+                            <div className="glass rounded-2xl p-6 text-center">
+                                <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-black/10 bg-black/[0.03]">
+                                    <Gauge size={28} className="text-black/50" />
                                 </div>
-                                <button className="rounded-xl bg-black px-5 py-3 font-semibold text-white">
-                                    Export Report
-                                </button>
+                                <h3 className="section-title text-2xl font-semibold text-black">Dashboard</h3>
+                                <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
+                                    Run an analysis to see your results here. CarSure evaluates pricing, risk,
+                                    fraud, verification, and generates an AI advisor recommendation.
+                                </p>
+                                <Link
+                                    href="/analyze"
+                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:bg-gray-800"
+                                >
+                                    <WandSparkles size={16} />
+                                    Go to Full Analysis
+                                </Link>
                             </div>
 
-                            <div className="grid gap-4 xl:grid-cols-2">
-                                <RiskRing value={63} />
-                                <div className="glass rounded-2xl p-5">
-                                    <h3 className="text-lg font-semibold text-black">Fraud Detection</h3>
-                                    <div className="mt-3 space-y-2 text-sm">
-                                        <div className="rounded-xl border border-red-300/50 bg-red-50 p-3">
-                                            <p className="flex items-center gap-2 font-semibold text-red-700">
-                                                <ShieldAlert size={16} /> Mileage inconsistency detected
-                                            </p>
-                                        </div>
-                                        <div className="rounded-xl border border-amber-300/50 bg-amber-50 p-3">
-                                            <p className="flex items-center gap-2 font-semibold text-amber-700">
-                                                <AlertTriangle size={16} /> Suspicious ownership history
-                                            </p>
-                                        </div>
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <div className="glass rounded-2xl p-5 text-center">
+                                    <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-black/[0.03]">
+                                        <Sparkles size={18} className="text-black/50" />
                                     </div>
+                                    <p className="text-sm font-semibold text-black">AI Advisor</p>
+                                    <p className="mt-1 text-xs text-gray-500">Context-aware buying recommendation powered by analysis + verification data</p>
                                 </div>
-
-                                <div className="glass rounded-2xl p-5">
-                                    <h3 className="text-lg font-semibold text-black">Condition Analysis</h3>
-                                    <div className="relative mt-3 h-56 rounded-xl border border-black/10 bg-gray-100">
-                                        <div className="absolute inset-0 bg-mesh-gradient opacity-70" />
-                                        {hotspots.map((spot) => (
-                                            <button
-                                                key={spot.id}
-                                                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/20 bg-black/5 px-2 py-1 text-xs text-black"
-                                                style={{ left: spot.x, top: spot.y }}
-                                            >
-                                                {spot.id} ({spot.severity})
-                                            </button>
-                                        ))}
+                                <div className="glass rounded-2xl p-5 text-center">
+                                    <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-black/[0.03]">
+                                        <ShieldCheck size={18} className="text-black/50" />
                                     </div>
+                                    <p className="text-sm font-semibold text-black">Verification</p>
+                                    <p className="mt-1 text-xs text-gray-500">Cross-check ownership, challans, and registration against official records</p>
                                 </div>
-
-                                <div className="glass rounded-2xl p-5">
-                                    <h3 className="text-lg font-semibold text-black">Cost Prediction</h3>
-                                    <p className="mt-2 text-sm text-gray-500">Estimated maintenance range: INR 20,000 - INR 60,000</p>
-                                    <div className="mt-4 h-3 rounded-full bg-black/5">
-                                        <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-gray-800 to-black" />
+                                <div className="glass rounded-2xl p-5 text-center">
+                                    <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-black/[0.03]">
+                                        <Car size={18} className="text-black/50" />
                                     </div>
-                                    <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                                        <li className="flex justify-between">
-                                            <span>Engine</span>
-                                            <span>INR 18,000</span>
-                                        </li>
-                                        <li className="flex justify-between">
-                                            <span>Tires &amp; Brakes</span>
-                                            <span>INR 14,000</span>
-                                        </li>
-                                        <li className="flex justify-between">
-                                            <span>Routine Service</span>
-                                            <span>INR 9,500</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <div id="history" className="glass rounded-2xl p-5">
-                                <h3 className="text-lg font-semibold text-black">Analysis Timeline</h3>
-                                <div className="mt-3 grid gap-2 text-sm text-gray-600 md:grid-cols-3">
-                                    <div className="rounded-xl border border-black/10 p-3">Mar 28 • Seller vehicle details submitted</div>
-                                    <div className="rounded-xl border border-black/10 p-3">Apr 03 • Risk score shifted 57 to 63</div>
-                                    <div className="rounded-xl border border-black/10 p-3">Apr 11 • Odometer anomaly confidence +12%</div>
+                                    <p className="text-sm font-semibold text-black">Risk & Fraud</p>
+                                    <p className="mt-1 text-xs text-gray-500">ML-powered risk scoring and fraud detection with confidence levels</p>
                                 </div>
                             </div>
                         </div>

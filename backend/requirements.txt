@@ -3,6 +3,5 @@ uvicorn
 pandas
 scikit-learn==1.6.1
 joblib
-opencv-python
 python-multipart
-numpy
+numpy==1.26.4

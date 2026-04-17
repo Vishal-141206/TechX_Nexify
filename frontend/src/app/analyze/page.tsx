@@ -22,7 +22,6 @@ type AnalyzeResponse = {
     price_range: string;
     risk_score: number;
     fraud_detected: boolean;
-    hidden_damage: boolean;
     data_confidence: string;
     recommendation: string;
     reasons: string[];
@@ -108,7 +107,6 @@ function normalizeAnalysisResponse(data: unknown): AnalyzeResponse {
         price_range: typeof root?.price_range === "string" ? root.price_range : "N/A",
         risk_score: safeRiskValue,
         fraud_detected: Boolean(root?.fraud_detected),
-        hidden_damage: Boolean(root?.hidden_damage),
         data_confidence:
             typeof root?.data_confidence === "string" ? root.data_confidence : "Unknown",
         recommendation:

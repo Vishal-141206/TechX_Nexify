@@ -137,12 +137,16 @@ def analyze_car(data):
     )
 
     vehicle_number = str(data.get("vehicle_number", "")).strip()
-    verification, verification_impact = _build_verification(
-        vehicle_number,
-        owners,
-        year,
-        fuel,
-    )
+    try:
+        verification, verification_impact = _build_verification(
+            vehicle_number,
+            owners,
+            year,
+            fuel,
+        )
+    except Exception:
+        verification = {"status": "Not Available", "details": {}}
+        verification_impact = {"risk_delta": 0, "fraud": False, "reasons": ["Verification service encountered an error"]}
 
     risk = min(10, risk + verification_impact.get("risk_delta", 0))
     if verification_impact.get("fraud"):
@@ -169,7 +173,18 @@ def analyze_car(data):
         "verification": verification,
     }
 
+    # Internal fields for AI advisor (prefixed with _ so they're stripped before LLM)
+    response["_model"] = str(data.get("model", "")).strip()
+    response["_fuel_type"] = fuel
+
     verification_for_ai = verification if isinstance(verification, dict) else {"status": "Not Available", "details": {}}
-    response["ai_advice"] = generate_ai_advice(response, verification_for_ai)
+    try:
+        response["ai_advice"] = generate_ai_advice(response, verification_for_ai)
+    except Exception:
+        response["ai_advice"] = "AI advice not available"
+
+    # Remove internal fields from final API response
+    response.pop("_model", None)
+    response.pop("_fuel_type", None)
 
     return response
