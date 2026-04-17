@@ -331,7 +331,12 @@ export default function AnalyzePage() {
     return (
         <main className="mx-auto min-h-screen max-w-6xl px-5 py-10">
             <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-                <section className="glass rounded-3xl p-6">
+                <motion.section
+                    className="glass rounded-3xl p-6"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4 }}
+                >
                     <h1 className="section-title text-3xl font-semibold text-black">Analyze Car</h1>
                     <p className="mt-1 text-sm text-gray-500">
                         Submit car details to run the complete CarSure AI evaluation.
@@ -415,15 +420,20 @@ export default function AnalyzePage() {
                         <button
                             type="button"
                             onClick={onRunAnalysis}
-                            className="rounded-xl bg-black px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
+                            className="rounded-xl bg-black px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70 hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg transition-all active:translate-y-0 active:shadow-md"
                             disabled={isLoading}
                         >
                             {isLoading ? "Running Analysis..." : "Run AI Analysis"}
                         </button>
                     </form>
-                </section>
+                </motion.section>
 
-                <section className="glass relative overflow-hidden rounded-3xl p-6">
+                <motion.section
+                    className="glass relative overflow-hidden rounded-3xl p-6"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                >
                     <h2 className="section-title text-2xl font-semibold text-black">Live Analysis Status</h2>
                     <p className="mt-1 text-sm text-gray-500">
                         Realtime stream from CarSure pricing, risk, verification, and advisor engines
@@ -492,7 +502,7 @@ export default function AnalyzePage() {
                             </div>
                         </div>
                     </div>
-                </section>
+                </motion.section>
             </div>
 
             {analysis ? (
@@ -686,7 +696,7 @@ function Field({
                 required={required}
                 placeholder={placeholder}
                 onChange={(event) => onChange(event.target.value)}
-                className="w-full rounded-xl border border-black/15 bg-gray-50 px-4 py-3 text-sm text-black outline-none ring-black/10 transition placeholder:text-gray-400 focus:ring"
+                className="w-full rounded-xl border border-black/15 bg-gray-50 px-4 py-3 text-sm text-black outline-none ring-black/10 transition-all hover:bg-white hover:border-black/30 hover:shadow-sm focus:border-black/50 focus:bg-white focus:shadow-sm focus:ring placeholder:text-gray-400"
             />
         </label>
     );
@@ -711,7 +721,7 @@ function SelectField({ label, value, onChange, options, required = false }: Sele
                 value={value}
                 required={required}
                 onChange={(event) => onChange(event.target.value)}
-                className="w-full rounded-xl border border-black/15 bg-gray-50 px-4 py-3 text-sm text-black outline-none ring-black/10 transition focus:ring"
+                className="w-full rounded-xl border border-black/15 bg-gray-50 px-4 py-3 text-sm text-black outline-none ring-black/10 transition-all hover:bg-white hover:border-black/30 hover:shadow-sm focus:border-black/50 focus:bg-white focus:shadow-sm focus:ring"
             >
                 <option value="" disabled>
                     Select {label}

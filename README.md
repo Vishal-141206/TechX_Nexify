@@ -63,7 +63,7 @@ No guesswork. No assumptions. Just data.
 │         └────────┬────────┘────────────────┘         │
 │                  ▼                                   │
 │         ┌──────────────┐                             │
-│         │  AI Advisor  │  Groq LLM (llama-3.1-8b)   │
+│         │  AI Advisor  │  Groq LLM (llama-3.3-70b)  │
 │         │  + Fallback  │  Rule-based if API fails    │
 │         └──────────────┘                             │
 └─────────────────────────────────────────────────────┘
@@ -89,7 +89,7 @@ No guesswork. No assumptions. Just data.
 | **Frontend** | Next.js 16, React 19, Tailwind CSS, Framer Motion |
 | **Backend API** | Python, FastAPI, Uvicorn |
 | **ML Model** | scikit-learn (trained price prediction model) |
-| **AI Advisor** | Groq API (LLaMA 3.1 8B) with rule-based fallback |
+| **AI Advisor** | Groq API (LLaMA 3.3 70B Versatile) with fail-safe |
 | **Verification** | Mock engine + pluggable external API support |
 | **Data Processing** | pandas, NumPy, joblib |
 
@@ -210,7 +210,7 @@ export VEHICLE_VERIFICATION_API_KEY="your_api_key"
       "accident_history": "Not Available"
     }
   },
-  "ai_advice": "Price estimate is ₹5.5L-₹6.5L with a risk score of 5/10.\nVerification: Verified. Fraud: not detected.\nNo major red flags; a standard pre-purchase inspection is advised.\nRecommendation: Risky ."
+  "ai_advice": "**Hyundai Venue**:\nPrice estimate is ₹5.5L-₹6.5L with a risk score of 5/10.\nVerification: Verified. Fraud: not detected.\nNo major red flags; a standard pre-purchase inspection is advised.\nRecommendation: Risky ⚠️"
 }
 ```
 
