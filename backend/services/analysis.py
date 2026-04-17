@@ -1,123 +1,121 @@
+import os
+from groq import Groq
 from model.predictor import prepare_input, predict_price
-from services.ai_advisor import generate_ai_advice
 from services.risk_engine import analyze_risk
-from services.verification import fetch_vehicle_data
+from services.recommendation import recommend_cars
+from services.reddit_service import fetch_reddit_posts, clean_posts, summarize_reviews
+from services.ai_advisor import generate_ai_advice
 from utils.formatter import format_price_range
-
+from services.sentiment import analyze_sentiment
+import json
 
 def _recommendation_from_risk(risk, fraud):
     if fraud:
-        return "Avoid 🚨"
+        return "Avoid "
     if risk >= 8:
-        return "Avoid ❌"
+        return "Avoid "
     if risk >= 5:
-        return "Risky ⚠️"
-    return "Safe ✅"
+        return "Risky "
+    return "Safe "
 
 
-def _normalize_text(value):
-    if value is None:
-        return ""
-    return str(value).strip().lower()
+def _strip_json(content):
+    """Strip markdown fences from LLM output."""
+    if content.startswith("```json"): content = content[7:]
+    if content.startswith("```"): content = content[3:]
+    if content.endswith("```"): content = content[:-3]
+    return content.strip()
 
 
-def _empty_verification_details(vehicle_number, source, note):
-    return {
-        "owner_count": None,
-        "registration_year": None,
-        "fuel_type": None,
-        "challan_count": None,
-        "accident_history": "Not Available",
-        "vehicle_number": vehicle_number,
-        "source": source,
-        "mismatch_fields": [],
-        "note": note,
+def _generate_decision_block(best_car, all_cars, user_input):
+    """Generate why_this_wins and trade_offs for the best car using Groq."""
+    api_key = os.getenv("GROQ_API_KEY")
+    fallback = {
+        "why_this_wins": [
+            "Strongest overall profile alignment",
+            "Best value within budget constraints",
+            "Lower risk compared to alternatives"
+        ],
+        "trade_offs": ["Specific trade-offs require deeper inspection"]
     }
+    if not api_key:
+        return fallback
+
+    client = Groq(api_key=api_key)
+    other_cars = [c["car"] for c in all_cars if c["car"] != best_car["car"]]
+
+    prompt = f"""
+You are a car buying decision advisor.
+
+User profile:
+{json.dumps(user_input)}
+
+Best car selected: {best_car['car']} (Fit: {best_car['fit_score']}, Risk: {best_car['risk_score']}/10)
+Other candidates: {', '.join(other_cars)}
+
+Generate:
+- "why_this_wins": 2-3 SHORT comparative reasons (must reference user input like usage/budget/family OR compare against the other cars). Max 10 words each.
+- "trade_offs": 1-2 SHORT real negatives about this car. Max 8 words each.
+
+Return ONLY raw JSON. No markdown blocks.
+{{
+  "why_this_wins": ["...", "..."],
+  "trade_offs": ["..."]
+}}
+"""
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+        return json.loads(_strip_json(response.choices[0].message.content.strip()))
+    except Exception:
+        return fallback
 
 
-def _build_verification(vehicle_number, owner_count, year, fuel_type):
-    if not vehicle_number:
-        return {
-            "status": "Not Available",
-            "details": _empty_verification_details(
-                None,
-                "not_provided",
-                "Vehicle number not provided; verification skipped.",
-            ),
-        }, {
-            "risk_delta": 0,
-            "fraud": False,
-            "reasons": [],
-        }
+def _generate_why_not(rejected_cars, best_car, user_input):
+    """Generate rejection reasons for non-best cars."""
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key or not rejected_cars:
+        return [{"car": c["car"], "reasons": ["Lower overall fit score"]} for c in rejected_cars]
 
-    official_data = fetch_vehicle_data(vehicle_number)
+    client = Groq(api_key=api_key)
 
-    if official_data.get("source") == "unavailable":
-        return "Not Available", {
-            "risk_delta": 0,
-            "fraud": False,
-            "reasons": ["Vehicle verification service not available"],
-        }
+    cars_info = "\n".join([
+        f"- {c['car']} (Fit: {c['fit_score']}, Risk: {c['risk_score']}/10, Sentiment: {c['sentiment']['score']})"
+        for c in rejected_cars
+    ])
 
-    mismatch_fields = []
-    verification_reasons = []
-    risk_delta = 0
-    fraud = False
+    prompt = f"""
+User profile: {json.dumps(user_input)}
+Best car chosen: {best_car['car']}
 
-    official_owner_count = official_data.get("owner_count")
-    if official_owner_count is not None and int(official_owner_count) != owner_count:
-        mismatch_fields.append("owner_count")
-        fraud = True
-        risk_delta += 3
-        verification_reasons.append("Mismatch with official ownership records")
+These cars were NOT selected:
+{cars_info}
 
-    official_registration_year = official_data.get("registration_year")
-    if official_registration_year is not None and int(official_registration_year) != year:
-        mismatch_fields.append("registration_year")
-        fraud = True
-        risk_delta += 2
-        verification_reasons.append("Registration year mismatch with official records")
+For each rejected car, give 1-2 SHORT reasons why it lost (max 8 words each).
+Reference: risk score, sentiment, or mismatch with user needs.
 
-    official_fuel_type = official_data.get("fuel_type")
-    if official_fuel_type and _normalize_text(official_fuel_type) != _normalize_text(fuel_type):
-        mismatch_fields.append("fuel_type")
-        fraud = True
-        risk_delta += 2
-        verification_reasons.append("Fuel type mismatch with official records")
-
-    challan_count = official_data.get("challan_count")
-    if isinstance(challan_count, int) and challan_count >= 3:
-        risk_delta += 1
-        verification_reasons.append("Multiple challans found in official records")
-
-    accident_history = official_data.get("accident_history")
-    if accident_history == "Available":
-        risk_delta += 2
-        verification_reasons.append("Accident history found in official records")
-
-    verification_status = "Mismatch" if mismatch_fields else "Verified"
-
-    return {
-        "status": verification_status,
-        "details": {
-            "owner_count": official_owner_count,
-            "registration_year": official_registration_year,
-            "fuel_type": official_fuel_type,
-            "challan_count": official_data.get("challan_count"),
-            "accident_history": official_data.get("accident_history", "Not Available"),
-            "vehicle_number": vehicle_number,
-            "source": official_data.get("source", "mock"),
-            "mismatch_fields": mismatch_fields,
-        },
-    }, {
-        "risk_delta": risk_delta,
-        "fraud": fraud,
-        "reasons": verification_reasons,
-    }
+Return ONLY raw JSON array. No markdown blocks.
+[
+  {{"car": "...", "reasons": ["...", "..."]}},
+  ...
+]
+"""
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+        return json.loads(_strip_json(response.choices[0].message.content.strip()))
+    except Exception:
+        return [{"car": c["car"], "reasons": ["Lower overall fit score"]} for c in rejected_cars]
 
 
 def analyze_car(data):
-
+    """Single-vehicle rigorous diagnostic flow."""
     year = int(data["year"])
     mileage = float(data["mileage_kmpl"])
     engine = int(data["engine_cc"])
@@ -132,33 +130,9 @@ def analyze_car(data):
     price = predict_price(input_data)
     price_range = format_price_range(price)
 
-    risk, fraud, damage, reasons,confidence = analyze_risk(
+    risk, fraud, damage, reasons, confidence = analyze_risk(
         year, mileage, engine, owners, fuel
     )
-
-    vehicle_number = str(data.get("vehicle_number", "")).strip()
-    try:
-        verification, verification_impact = _build_verification(
-            vehicle_number,
-            owners,
-            year,
-            fuel,
-        )
-    except Exception:
-        verification = {"status": "Not Available", "details": {}}
-        verification_impact = {"risk_delta": 0, "fraud": False, "reasons": ["Verification service encountered an error"]}
-
-    risk = min(10, risk + verification_impact.get("risk_delta", 0))
-    if verification_impact.get("fraud"):
-        fraud = True
-    for reason in verification_impact.get("reasons", []):
-        if reason not in reasons:
-            reasons.append(reason)
-
-    if isinstance(verification, str) and verification == "Not Available":
-        for reason in verification_impact.get("reasons", []):
-            if reason not in reasons:
-                reasons.append(reason)
 
     recommendation = _recommendation_from_risk(risk, fraud)
 
@@ -170,21 +144,116 @@ def analyze_car(data):
         "data_confidence": confidence,
         "recommendation": recommendation,
         "reasons": reasons,
-        "verification": verification,
     }
 
-    # Internal fields for AI advisor (prefixed with _ so they're stripped before LLM)
+    # Internal fields for AI advisor wrapper
     response["_model"] = str(data.get("model", "")).strip()
-    response["_fuel_type"] = fuel
 
-    verification_for_ai = verification if isinstance(verification, dict) else {"status": "Not Available", "details": {}}
     try:
-        response["ai_advice"] = generate_ai_advice(response, verification_for_ai)
+        response["ai_advice"] = generate_ai_advice(response)
     except Exception:
         response["ai_advice"] = "AI advice not available"
 
-    # Remove internal fields from final API response
     response.pop("_model", None)
-    response.pop("_fuel_type", None)
-
     return response
+
+
+def run_assistant_pipeline(data):
+    """Questionnaire-driven multi-car decision system."""
+    top_cars = recommend_cars(data)
+    is_new = data.get("car_condition", "used") == "new"
+
+    comparisons = []
+    community_insights = []
+    enriched_candidates = []
+
+    for car in top_cars:
+        car_name = car["car"]
+        specs = car["specs"]
+        fit_score = car.get("fit_score", 85)
+
+        if is_new:
+            # New cars: use LLM-provided showroom price, no ML prediction or risk scoring
+            raw_price = car.get("showroom_price", data.get("budget", 800000))
+            price_range = format_price_range(raw_price)
+            risk = 0
+        else:
+            # Used cars: ML price prediction + risk scoring
+            model_input = prepare_input(
+                specs["year"], specs["mileage_kmpl"], specs["engine_cc"],
+                specs["owner_count"], specs["fuel_type"], specs["transmission"]
+            )
+            predicted_price = predict_price(model_input)
+            price_range = format_price_range(predicted_price)
+            risk, _, _, _, _ = analyze_risk(
+                specs["year"], specs["mileage_kmpl"], specs["engine_cc"],
+                specs["owner_count"], specs["fuel_type"]
+            )
+
+        # Reddit Data & Sentiment
+        raw_posts = fetch_reddit_posts(car_name)
+        cleaned_posts = clean_posts(raw_posts)
+        sentiment_data = analyze_sentiment(cleaned_posts)
+        insights = summarize_reviews(cleaned_posts, car_name)
+
+        top_issue = insights.get("top_issue", "Minor issues reported")
+
+        candidate = {
+            "car": car_name,
+            "fit_score": fit_score,
+            "risk_score": risk,
+            "price_range": price_range,
+            "sentiment": sentiment_data,
+            "top_issue": top_issue
+        }
+        enriched_candidates.append(candidate)
+
+        comparisons.append({
+            "car": car_name,
+            "fit_score": fit_score,
+            "risk_score": risk,
+            "sentiment": sentiment_data,
+            "top_issue": top_issue
+        })
+
+        community_insights.append({
+            "car": car_name,
+            "pros": insights.get("pros", []),
+            "cons": insights.get("cons", []),
+            "verdict": insights.get("verdict", "")
+        })
+
+    # Pick the best choice: fit_score - risk_score descending
+    sorted_candidates = sorted(enriched_candidates, key=lambda x: x["fit_score"] - x["risk_score"], reverse=True)
+    best = sorted_candidates[0]
+    rejected = sorted_candidates[1:]
+
+    # Generate decision block (why_this_wins + trade_offs)
+    decision_block = _generate_decision_block(best, enriched_candidates, data)
+
+    # Generate why_not for rejected cars
+    why_not = _generate_why_not(rejected, best, data)
+
+    # Calculate decision confidence
+    decision_confidence = int(
+        0.5 * best["fit_score"] +
+        0.3 * best["sentiment"]["score"] +
+        0.2 * (100 - best["risk_score"] * 10)
+    )
+    decision_confidence = max(0, min(100, decision_confidence))
+
+    return {
+        "best_choice": {
+            "car": best["car"],
+            "fit_score": best["fit_score"],
+            "risk_score": best["risk_score"],
+            "price_range": best["price_range"],
+            "sentiment": best["sentiment"],
+            "why_this_wins": decision_block.get("why_this_wins", []),
+            "trade_offs": decision_block.get("trade_offs", [])
+        },
+        "comparisons": comparisons,
+        "why_not": why_not,
+        "community_insights": community_insights,
+        "decision_confidence": decision_confidence
+    }

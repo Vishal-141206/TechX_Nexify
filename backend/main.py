@@ -1,6 +1,6 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
-from services.analysis import analyze_car
+from services.analysis import analyze_car, run_assistant_pipeline
 
 app = FastAPI()
 app.add_middleware(
@@ -18,3 +18,7 @@ def home():
 @app.post("/analyze")
 def analyze(data: dict):
     return analyze_car(data)
+
+@app.post("/assistant")
+def assistant(data: dict):
+    return run_assistant_pipeline(data)

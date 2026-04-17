@@ -15,6 +15,7 @@ import {
     ShieldAlert,
     ShieldCheck,
     Sparkles,
+    MessageSquare,
     WandSparkles,
     type LucideIcon,
 } from "lucide-react";
@@ -32,59 +33,51 @@ type StoryFrame = {
 
 const storyFrames: StoryFrame[] = [
     {
-        title: "Know Your Car Before You Buy",
-        subtitle: "Cinematic AI intelligence for smarter used-car decisions.",
-        detail: "CarSure uses advanced machine learning to analyze every aspect of a used car — from mechanical health to ownership history.",
-        badge: "Intro",
-        Icon: Car,
+        title: "Dual Architecture Engine",
+        subtitle: "Choose between rigorous diagnostics or structured buying matrices.",
+        detail: "CarSure offers two separate execution flows: Analyze a singular vehicle technically, or request a Dashboard of recommendations tailored to your profile.",
+        badge: "Architecture",
+        Icon: LayoutDashboard,
         step: "01",
     },
     {
-        title: "AI-powered Risk Analysis",
-        subtitle: "Engine, drivetrain, and hidden reliability risks surfaced in seconds.",
-        detail: "Our risk scoring engine evaluates 40+ parameters across mechanical, electrical, and structural systems.",
-        badge: "Risk Assessment",
-        Icon: ShieldAlert,
+        title: "ML Rigorous Diagnostic",
+        subtitle: "Analyze specific vehicle parameters with predictive thresholds.",
+        detail: "Provide Year, Engine CC, and Mileage. The ML models calculate Price Bounds and surface mechanical Risk Scores directly for the vehicle.",
+        badge: "Analyze Car",
+        Icon: Gauge,
         step: "02",
     },
     {
-        title: "Detect Hidden Fraud Instantly",
-        subtitle: "Spot mileage tampering and ownership inconsistencies with confidence.",
-        detail: "Cross-referencing service records, odometer readings, and registration history to detect anomalies.",
-        badge: "Fraud Detection",
-        Icon: AlertTriangle,
+        title: "AI Buying Assistant",
+        subtitle: "Questionnaire-powered multi-vehicle market generation.",
+        detail: "Instead of specifying specs, provide your Lifestyle profile. An LLM dynamically constructs an active market catalog tailored to your Needs and Budget.",
+        badge: "Assistant",
+        Icon: WandSparkles,
         step: "03",
     },
     {
-        title: "Vehicle Verification Engine",
-        subtitle: "Cross-check ownership, challans, and registration data against official records.",
-        detail: "CarSure verifies seller claims by matching submitted details with government registration and challan databases.",
-        badge: "Verification",
+        title: "Decision Dashboard Matrix",
+        subtitle: "Compare AI recommendations using strict structured data.",
+        detail: "No conversational chatbots. Your recommendations render visually as a Dashboard matrix mapping exact Fit Scores, Risk Ratings, and Target Prices side-by-side.",
+        badge: "Features",
         Icon: ShieldCheck,
         step: "04",
     },
     {
-        title: "AI-Powered Buying Advisor",
-        subtitle: "Get a clear, data-driven recommendation on whether to proceed.",
-        detail: "Our AI advisor synthesizes pricing, risk, fraud, and verification signals into a concise buying recommendation.",
-        badge: "AI Advisor",
-        Icon: Sparkles,
+        title: "HuggingFace Community Tracking",
+        subtitle: "Real-time semantic insight compilation from the community.",
+        detail: "CarSure scrapes Reddit discussions, scores absolute quantified Sentiment through roberta-base Transformers, and strictly extracts critical Top Issues.",
+        badge: "Reddit Integrations",
+        Icon: MessageSquare,
         step: "05",
-    },
-    {
-        title: "Analyze Your Car Now",
-        subtitle: "Enter car details, run deep analysis, and compare with market signals.",
-        detail: "Ready to make a smarter decision? Start your AI-powered analysis in under 60 seconds.",
-        badge: "Final Frame",
-        Icon: WandSparkles,
-        step: "06",
     },
 ];
 
 /* ─────────────────────── Combined App Section ─────────────────────── */
 
 function AppSection() {
-    const [activeTab, setActiveTab] = useState<"analyze" | "dashboard">("analyze");
+    const [activeTab, setActiveTab] = useState<"analyze" | "assistant">("analyze");
 
     return (
         <section id="app-section" className="mx-auto mt-20 max-w-7xl px-5 pb-20">
@@ -95,8 +88,8 @@ function AppSection() {
                         <button onClick={() => setActiveTab("analyze")} className={`w-full flex items-center justify-start gap-2 rounded-lg px-3 py-2 transition-colors ${activeTab === "analyze" ? "bg-black/5 font-medium text-black" : "hover:bg-black/5"}`}>
                             <WandSparkles size={16} /> Analyze Car
                         </button>
-                        <button onClick={() => setActiveTab("dashboard")} className={`w-full flex items-center justify-start gap-2 rounded-lg px-3 py-2 transition-colors ${activeTab === "dashboard" ? "bg-black/5 font-medium text-black" : "hover:bg-black/5"}`}>
-                            <LayoutDashboard size={16} /> Dashboard
+                        <button onClick={() => setActiveTab("assistant")} className={`w-full flex items-center justify-start gap-2 rounded-lg px-3 py-2 transition-colors ${activeTab === "assistant" ? "bg-black/5 font-medium text-black" : "hover:bg-black/5"}`}>
+                            <Sparkles size={16} /> AI Buying Assistant
                         </button>
                         {/* <Link href="/compare" scroll={false} className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 hover:bg-black/5 transition-colors">
                             <Car size={16} /> Compare Cars
@@ -141,12 +134,12 @@ function AppSection() {
                                 <div className="glass rounded-2xl p-5">
                                     <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 2</p>
                                     <p className="mt-2 text-sm font-semibold text-black">AI Runs Analysis</p>
-                                    <p className="mt-1 text-xs text-gray-500">Price prediction, risk scoring, fraud detection, and verification</p>
+                                    <p className="mt-1 text-xs text-gray-500">Price prediction, risk scoring, and fraud detection</p>
                                 </div>
                                 <div className="glass rounded-2xl p-5">
                                     <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 3</p>
                                     <p className="mt-2 text-sm font-semibold text-black">Get AI Recommendation</p>
-                                    <p className="mt-1 text-xs text-gray-500">Clear buying advice based on all analysis and verification data</p>
+                                    <p className="mt-1 text-xs text-gray-500">Clear buying advice based on all analysis data</p>
                                 </div>
                             </div>
                         </div>
@@ -154,43 +147,36 @@ function AppSection() {
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
                             <div className="glass rounded-2xl p-6 text-center">
                                 <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-black/10 bg-black/[0.03]">
-                                    <Gauge size={28} className="text-black/50" />
+                                    <Sparkles size={28} className="text-black/50" />
                                 </div>
-                                <h3 className="section-title text-2xl font-semibold text-black">Dashboard</h3>
+                                <h3 className="section-title text-2xl font-semibold text-black">AI Buying Assistant</h3>
                                 <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-                                    Run an analysis to see your results here. CarSure evaluates pricing, risk,
-                                    fraud, verification, and generates an AI advisor recommendation.
+                                    Not sure which car to buy? Just tell us your budget, family size, usage, and priority. Our AI will scan the market and evaluate the best fit utilizing reddit insights and ML pricing bounds.
                                 </p>
                                 <Link
-                                    href="/analyze"
+                                    href="/assistant"
                                     className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:bg-gray-800"
                                 >
-                                    <WandSparkles size={16} />
-                                    Go to Full Analysis
+                                    <Sparkles size={16} />
+                                    Launch AI Assistant
                                 </Link>
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-3">
-                                <div className="glass rounded-2xl p-5 text-center">
-                                    <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-black/[0.03]">
-                                        <Sparkles size={18} className="text-black/50" />
-                                    </div>
-                                    <p className="text-sm font-semibold text-black">AI Advisor</p>
-                                    <p className="mt-1 text-xs text-gray-500">Context-aware buying recommendation powered by analysis + verification data</p>
+                                <div className="glass rounded-2xl p-5">
+                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Phase 1</p>
+                                    <p className="mt-2 text-sm font-semibold text-black">Tell us your needs</p>
+                                    <p className="mt-1 text-xs text-gray-500">Set budget, family size, and driving preferences</p>
                                 </div>
-                                <div className="glass rounded-2xl p-5 text-center">
-                                    <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-black/[0.03]">
-                                        <ShieldCheck size={18} className="text-black/50" />
-                                    </div>
-                                    <p className="text-sm font-semibold text-black">Verification</p>
-                                    <p className="mt-1 text-xs text-gray-500">Cross-check ownership, challans, and registration against official records</p>
+                                <div className="glass rounded-2xl p-5">
+                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Phase 2</p>
+                                    <p className="mt-2 text-sm font-semibold text-black">Recommendation</p>
+                                    <p className="mt-1 text-xs text-gray-500">LLM evaluates the dynamic active market catalog</p>
                                 </div>
-                                <div className="glass rounded-2xl p-5 text-center">
-                                    <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-black/[0.03]">
-                                        <Car size={18} className="text-black/50" />
-                                    </div>
-                                    <p className="text-sm font-semibold text-black">Risk & Fraud</p>
-                                    <p className="mt-1 text-xs text-gray-500">ML-powered risk scoring and fraud detection with confidence levels</p>
+                                <div className="glass rounded-2xl p-5">
+                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Phase 3</p>
+                                    <p className="mt-2 text-sm font-semibold text-black">Insights Engine</p>
+                                    <p className="mt-1 text-xs text-gray-500">Reviews and extracts community verdict on top picks</p>
                                 </div>
                             </div>
                         </div>

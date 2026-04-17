@@ -21,7 +21,7 @@ Buying a used car in India is a gamble:
 
 ##  Solution
 
-**CarSure AI** analyzes a used car's data and generates a **complete intelligence report in seconds** — covering pricing, risk, fraud, vehicle verification, and an AI-generated buying recommendation.
+**CarSure AI** gives you two powerful tools: an **AI Car Analyzer** to run diagnostics on a specific vehicle and an **AI Buying Assistant** to recommend the absolute best cars for your budget and lifestyle. 
 
 No guesswork. No assumptions. Just data.
 
@@ -35,9 +35,11 @@ No guesswork. No assumptions. Just data.
 |  **Risk Scoring Engine** | 0–10 score evaluating age, usage patterns, ownership history, and mechanical indicators |
 |  **Fraud Detection** | Detects odometer tampering, suspicious data combinations, and "too perfect" seller profiles |
 |  **Data Confidence Rating** | Tells you how trustworthy the submitted data is — High / Medium / Low |
-|  **Vehicle Verification** | Cross-checks ownership, registration year, fuel type, challans, and accident history against official records |
-|  **AI Buying Advisor** | LLM-powered single-response advisor that synthesizes all analysis into a clear 4-line recommendation |
-|  **Explainable Reasons** | Every risk flag comes with a human-readable explanation of *why* |
+|  **Dual Architecture** | Supports both single-vehicle diagnostics (`/analyze`) and a structured decision system (`/assistant`) |
+|  **Decision System** | Best Choice with comparative `why_this_wins`, `trade_offs`, and a numeric `decision_confidence` score |
+|  **Sentiment Humanization** | HuggingFace RoBERTa scores mapped to human labels: Positive 👍 / Neutral ⚖️ / Risk ⚠️ |
+|  **Why-Not Engine** | LLM-generated rejection reasons for every non-winning car, referencing risk, sentiment, and user profile mismatch |
+|  **Community Insights** | Scrapes `r/CarsIndia`, quantifies sentiment via `roberta-base-sentiment`, and extracts strict JSON `pros`, `cons`, `top_issue`, and `verdict` |
 
 ---
 
@@ -55,9 +57,9 @@ No guesswork. No assumptions. Just data.
 │                  FastAPI Backend                     │
 │                                                     │
 │  ┌──────────────┐  ┌──────────────┐  ┌───────────┐  │
-│  │ ML Predictor │  │ Risk Engine  │  │Verification│  │
-│  │ (price_model │  │ (fraud,risk, │  │ (mock/API) │  │
-│  │   .pkl)      │  │  confidence) │  │            │  │
+│  │ ML Predictor │  │ Risk Engine  │  │ Reddit API│  │
+│  │ (price_model │  │ (fraud,risk, │  │ (scraper) │  │
+│  │   .pkl)      │  │  confidence) │  │           │  │
 │  └──────┬───────┘  └──────┬───────┘  └─────┬──────┘  │
 │         │                 │                │         │
 │         └────────┬────────┘────────────────┘         │
