@@ -36,7 +36,7 @@ No guesswork. No assumptions. Just data.
 |  **Fraud Detection** | Detects odometer tampering, suspicious data combinations, and "too perfect" seller profiles |
 |  **Data Confidence Rating** | Tells you how trustworthy the submitted data is — High / Medium / Low |
 |  **Vehicle Verification** | Cross-checks ownership, registration year, fuel type, challans, and accident history against official records |
-| b**AI Buying Advisor** | LLM-powered single-response advisor that synthesizes all analysis into a clear 4-line recommendation |
+|  **AI Buying Advisor** | LLM-powered single-response advisor that synthesizes all analysis into a clear 4-line recommendation |
 |  **Explainable Reasons** | Every risk flag comes with a human-readable explanation of *why* |
 
 ---
