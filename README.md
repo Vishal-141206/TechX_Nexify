@@ -38,7 +38,7 @@ No guesswork. No assumptions. Just data.
 |---|---|
 | **ML Price Prediction** | Trained model predicts fair market price range based on year, mileage, engine, fuel type, transmission, and ownership |
 | **Risk Scoring Engine** | 0-10 score evaluating age, usage patterns, ownership history, and mechanical indicators |
-| **Fraud Detection** | Detects odometer tampering, suspicious data combinations, and "too perfect" seller profiles |
+| **3-Level Fraud Classification** | Cumulative signal-based fraud scoring: L1 Clean (0 signals), L2 Suspicious (1-2 signals), L3 High Risk (3+ signals) |
 | **Data Confidence Rating** | Tells you how trustworthy the submitted data is — High / Medium / Low |
 | **Dual Architecture** | Supports both single-vehicle diagnostics (`/analyze`) and a structured decision system (`/assistant`) |
 | **Used vs New Toggle** | User selects car condition; used cars go through ML pricing + risk engine, new cars use LLM showroom pricing with zero risk |
@@ -209,7 +209,8 @@ Single-vehicle diagnostic endpoint.
 {
   "price_range": "5.5L - 6.5L",
   "risk_score": 5,
-  "fraud_detected": false,
+  "fraud_level": 2,
+  "fraud_label": "Suspicious",
   "hidden_damage": false,
   "data_confidence": "High",
   "recommendation": "Risky",
@@ -264,15 +265,26 @@ Multi-car decision dashboard endpoint.
 
 ## Risk Engine Logic
 
-| Factor | Risk Impact | Confidence Impact |
-|---|---|---|
-| Low mileage on old car | +3 risk, fraud flag | -30% confidence |
-| "Too perfect" profile (old, 1 owner, high mileage) | +2 risk, fraud flag | -20% confidence |
-| Vehicle age > 12 years | +3 risk | -10% confidence |
-| 5+ owners | +3 risk | -15% confidence |
-| Engine >3000cc with low efficiency | +2 risk, damage flag | -10% confidence |
-| Diesel with mileage < 12 | +1 risk | -- |
-| Old EV (>8 years) | +2 risk | -10% confidence |
+| Factor | Risk Impact | Fraud Signals | Confidence Impact |
+|---|---|---|---|
+| Low mileage on old car | +3 risk | +2 signals | -30% confidence |
+| "Too perfect" profile (old, 1 owner, high mileage) | +2 risk | +2 signals | -20% confidence |
+| Vehicle age > 12 years | +3 risk | -- | -10% confidence |
+| 5+ owners | +3 risk | +1 signal | -15% confidence |
+| Engine >3000cc with low efficiency | +2 risk, damage flag | -- | -10% confidence |
+| Engine >3000cc with high efficiency | +2 risk | +2 signals | -20% confidence |
+| Diesel with mileage < 12 | +1 risk | -- | -- |
+| Old EV (>8 years) | +2 risk | -- | -10% confidence |
+| Old car (>10yr) + many owners (>3) | +1 risk | +1 signal | -5% confidence |
+| Old car (>10yr) + high mileage (>22) | +2 risk | +2 signals | -20% confidence |
+
+### Fraud Classification Levels
+
+| Level | Signal Count | Label | Action |
+|---|---|---|---|
+| L1 | 0 | Clean | No anomalies detected |
+| L2 | 1-2 | Suspicious | Some patterns flagged, needs inspection |
+| L3 | 3+ | High Risk | Multiple fraud indicators confirmed |
 
 ---
 

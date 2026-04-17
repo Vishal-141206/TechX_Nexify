@@ -7,7 +7,8 @@ import { Bot, Gauge, ShieldAlert } from "lucide-react";
 type AnalyzeResponse = {
     price_range: string;
     risk_score: number;
-    fraud_detected: boolean;
+    fraud_level: number;
+    fraud_label: string;
     data_confidence: string;
     recommendation: string;
     reasons: string[];
@@ -130,7 +131,8 @@ export default function AnalyzePage() {
             setAnalysis({
                 price_range: data.price_range || "N/A",
                 risk_score: typeof data.risk_score === "number" ? data.risk_score : 0,
-                fraud_detected: !!data.fraud_detected,
+                fraud_level: typeof data.fraud_level === "number" ? data.fraud_level : 1,
+                fraud_label: data.fraud_label || "Clean",
                 data_confidence: data.data_confidence || "Medium",
                 recommendation: data.recommendation || "Pending",
                 reasons: Array.isArray(data.reasons) ? data.reasons : [],
@@ -299,13 +301,34 @@ export default function AnalyzePage() {
                                 <div className="flex items-center gap-3">
                                     <ShieldAlert size={20} className="text-black/40" />
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-800">Fraud Detection</p>
-                                        <p className="text-xs text-gray-500">Anomaly bounds validation</p>
+                                        <p className="text-sm font-semibold text-gray-800">Fraud Risk Classification</p>
+                                        <p className="text-xs text-gray-500">3-level anomaly bounds validation</p>
                                     </div>
                                 </div>
-                                <span className={`font-semibold ${analysis ? (analysis.fraud_detected ? "text-red-600" : "text-emerald-600") : "text-gray-400"}`}>
-                                    {analysis ? (analysis.fraud_detected ? "Flagged" : "Clear") : "Pending"}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-bold px-2 py-1 rounded ${
+                                        analysis 
+                                            ? analysis.fraud_level >= 3 
+                                                ? "bg-red-100 text-red-700" 
+                                                : analysis.fraud_level >= 2 
+                                                    ? "bg-yellow-100 text-yellow-700" 
+                                                    : "bg-emerald-100 text-emerald-700"
+                                            : "bg-gray-100 text-gray-400"
+                                    }`}>
+                                        {analysis ? `L${analysis.fraud_level}` : "--"}
+                                    </span>
+                                    <span className={`font-semibold text-sm ${
+                                        analysis 
+                                            ? analysis.fraud_level >= 3 
+                                                ? "text-red-600" 
+                                                : analysis.fraud_level >= 2 
+                                                    ? "text-yellow-600" 
+                                                    : "text-emerald-600"
+                                            : "text-gray-400"
+                                    }`}>
+                                        {analysis ? analysis.fraud_label : "Pending"}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

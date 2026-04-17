@@ -9,14 +9,14 @@ from utils.formatter import format_price_range
 from services.sentiment import analyze_sentiment
 import json
 
-def _recommendation_from_risk(risk, fraud):
-    if fraud:
-        return "Avoid "
+def _recommendation_from_risk(risk, fraud_level):
+    if fraud_level >= 3:
+        return "Avoid"
     if risk >= 8:
-        return "Avoid "
+        return "Avoid"
     if risk >= 5:
-        return "Risky "
-    return "Safe "
+        return "Risky"
+    return "Safe"
 
 
 def _strip_json(content):
@@ -130,16 +130,17 @@ def analyze_car(data):
     price = predict_price(input_data)
     price_range = format_price_range(price)
 
-    risk, fraud, damage, reasons, confidence = analyze_risk(
+    risk, fraud_level, fraud_label, damage, reasons, confidence = analyze_risk(
         year, mileage, engine, owners, fuel
     )
 
-    recommendation = _recommendation_from_risk(risk, fraud)
+    recommendation = _recommendation_from_risk(risk, fraud_level)
 
     response = {
         "price_range": price_range,
         "risk_score": risk,
-        "fraud_detected": fraud,
+        "fraud_level": fraud_level,
+        "fraud_label": fraud_label,
         "hidden_damage": damage,
         "data_confidence": confidence,
         "recommendation": recommendation,
@@ -185,7 +186,7 @@ def run_assistant_pipeline(data):
             )
             predicted_price = predict_price(model_input)
             price_range = format_price_range(predicted_price)
-            risk, _, _, _, _ = analyze_risk(
+            risk, _, _, _, _, _ = analyze_risk(
                 specs["year"], specs["mileage_kmpl"], specs["engine_cc"],
                 specs["owner_count"], specs["fuel_type"]
             )
