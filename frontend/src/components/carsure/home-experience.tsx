@@ -235,14 +235,14 @@ function FrameOverlay({ currentFrame }: { currentFrame: number }) {
 
     return (
         <div className="pointer-events-none relative min-h-[300px] md:min-h-[330px]">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
                 <motion.div
                     key={frame.title}
                     className="glass pointer-events-auto absolute inset-x-0 bottom-0 max-w-3xl rounded-2xl p-5 md:p-7"
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                 >
                     <div className="mb-4 flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03]">
@@ -382,15 +382,15 @@ export function HomeExperience() {
                         />
                     </button>
 
-                    <AnimatePresence mode="wait" initial={false}>
+                    <AnimatePresence initial={false}>
                         {!showApp ? (
                             <motion.div
                                 key="scroll-narrative"
                                 className="absolute inset-0"
                                 initial={{ opacity: 1 }}
                                 animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.6, ease: "easeInOut" }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={{ duration: 0.4, ease: "easeInOut" }}
                             >
                                 <div className="pointer-events-none absolute inset-0">
                                     <div className="mx-auto grid h-full w-[min(1180px,94vw)] grid-cols-1 items-end gap-4 px-3 pb-7 md:grid-cols-[1.15fr_0.85fr] md:pb-10">
@@ -403,12 +403,11 @@ export function HomeExperience() {
                             <motion.div
                                 key="app-transition"
                                 className="absolute inset-0 flex items-center justify-center"
-                                initial={{ opacity: 0, scale: 0.97 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.6, ease: "easeInOut" }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.4, ease: "easeInOut" }}
                             >
-                                <div className="text-center">
+                                <div className="text-center absolute inset-0 flex flex-col items-center justify-center">
                                     <p className="mb-3 inline-flex rounded-full border border-black/15 bg-black/5 px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-black">
                                         Analysis Ready
                                     </p>
@@ -448,20 +447,9 @@ export function HomeExperience() {
                 </div>
             </section>
 
-            {/* ── App Section (outside scroll trap) ── */}
-            <AnimatePresence>
-                {showApp && (
-                    <motion.div
-                        key="app-content"
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 40 }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                    >
-                        <AppSection />
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <div id="app-section">
+                    <AppSection />
+            </div>
         </div>
     );
 }
