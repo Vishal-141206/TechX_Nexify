@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -20,7 +20,8 @@
 }
 
 html {
-    overflow-x: clip; /* clip prevents horizontal overflow WITHOUT breaking position: sticky */
+    overflow-x: clip;
+    /* clip prevents horizontal overflow WITHOUT breaking position: sticky */
 }
 
 body {
@@ -46,6 +47,13 @@ a {
 .section-title {
     font-family: Poppins, ui-sans-serif, system-ui;
     letter-spacing: 0.02em;
+}
+
+.orbitron-brand {
+    font-family: "Orbitron", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
 }
 
 .scan-line::before {
