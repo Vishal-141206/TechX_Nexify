@@ -1,6 +1,7 @@
-# CarSure AI
+# CarSure
 
-### AI-Powered Used Car Risk Assessment & Fraud Detection System
+### AI-Powered Used Car Risk Assessment & Fraud Detection System for buying second-hand car
+ONE PLATFORM THAT CAN BE USED BEFORE BUYING OR THINKING ABOUT USED CAR
 
 ---
 
