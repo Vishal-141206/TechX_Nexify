@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -14,7 +13,6 @@ import {
     Settings,
     ShieldAlert,
     TrendingUp,
-    UploadCloud,
     WandSparkles,
     type LucideIcon,
 } from "lucide-react";
@@ -56,9 +54,9 @@ const storyFrames: StoryFrame[] = [
         step: "03",
     },
     {
-        title: "Visual Damage Detection using AI",
-        subtitle: "Computer vision maps dents, scratches, and severity hotspots.",
-        detail: "Upload photos from any angle — our vision model identifies body damage with pixel-level accuracy.",
+        title: "Condition Pattern Detection",
+        subtitle: "AI maps risk hotspots from declared condition and history patterns.",
+        detail: "CarSure highlights possible wear severity areas by combining ownership, mileage, and risk signals.",
         badge: "Condition Analysis",
         Icon: Eye,
         step: "04",
@@ -73,7 +71,7 @@ const storyFrames: StoryFrame[] = [
     },
     {
         title: "Analyze Your Car Now",
-        subtitle: "Upload photos, run deep analysis, and compare with market signals.",
+        subtitle: "Enter car details, run deep analysis, and compare with market signals.",
         detail: "Ready to make a smarter decision? Start your AI-powered analysis in under 60 seconds.",
         badge: "Final Frame",
         Icon: WandSparkles,
@@ -122,14 +120,7 @@ function AnalysisField({ label, placeholder }: { label: string; placeholder: str
 
 function AppSection() {
     const [activeTab, setActiveTab] = useState<"analyze" | "dashboard">("analyze");
-    const [files, setFiles] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
-    const previews = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
-
-    useEffect(() => {
-        return () => { previews.forEach((src) => URL.revokeObjectURL(src)); };
-    }, [previews]);
 
     const onRunAnalysis = () => {
         setIsLoading(true);
@@ -174,7 +165,7 @@ function AppSection() {
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
                             <div className="glass rounded-2xl p-5">
                                 <h3 className="section-title text-2xl font-semibold text-black">Analyze Car</h3>
-                                <p className="mt-1 text-sm text-gray-500">Upload details and images to run the CarSure AI pipeline.</p>
+                                <p className="mt-1 text-sm text-gray-500">Enter vehicle details to run the CarSure AI pipeline.</p>
 
                                 <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
                                     <div className="grid gap-4 md:grid-cols-2">
@@ -183,21 +174,6 @@ function AppSection() {
                                         <AnalysisField label="Kilometers Driven" placeholder="e.g. 68200" />
                                         <AnalysisField label="Fuel Type" placeholder="Diesel / Petrol / EV" />
                                     </div>
-
-                                    <label className="block cursor-pointer rounded-2xl border border-dashed border-black/20 bg-black/[0.02] p-6 text-center hover:bg-black/[0.04]">
-                                        <input type="file" className="hidden" multiple accept="image/*" onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
-                                        <UploadCloud className="mx-auto mb-3 text-gray-500" />
-                                        <p className="font-semibold text-black">Drag and drop images or click to upload</p>
-                                        <p className="text-sm text-gray-400">Front, rear, sides, dashboard, tires, and engine bay</p>
-                                    </label>
-
-                                    {previews.length > 0 && (
-                                        <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-                                            {previews.map((src, i) => (
-                                                <Image key={src} src={src} alt={`Preview ${i + 1}`} width={240} height={140} className="h-24 w-full rounded-lg object-cover" unoptimized />
-                                            ))}
-                                        </div>
-                                    )}
 
                                     <button type="button" onClick={onRunAnalysis} className="ml-auto mr-0 block rounded-xl bg-black px-5 py-2.5 font-semibold text-white transition hover:bg-gray-800">
                                         Run AI Analysis
@@ -216,7 +192,7 @@ function AppSection() {
                                             transition={{ repeat: isLoading ? Infinity : 0, duration: 1.3 }}
                                         >
                                             <p className="text-xl font-semibold text-black">{isLoading ? "Analyzing vehicle..." : "Ready for analysis"}</p>
-                                            <p className="mt-2 text-sm text-gray-400">{isLoading ? "Scanning body panel geometry and odometer patterns" : "Upload data and click Run AI Analysis to start"}</p>
+                                            <p className="mt-2 text-sm text-gray-400">{isLoading ? "Scanning risk and odometer patterns" : "Enter data and click Run AI Analysis to start"}</p>
                                         </motion.div>
                                     </div>
                                 </div>
@@ -295,7 +271,7 @@ function AppSection() {
                             <div id="history" className="glass rounded-2xl p-5">
                                 <h3 className="text-lg font-semibold text-black">Analysis Timeline</h3>
                                 <div className="mt-3 grid gap-2 text-sm text-gray-600 md:grid-cols-3">
-                                    <div className="rounded-xl border border-black/10 p-3">Mar 28 • Seller photos uploaded • 8 images</div>
+                                    <div className="rounded-xl border border-black/10 p-3">Mar 28 • Seller vehicle details submitted</div>
                                     <div className="rounded-xl border border-black/10 p-3">Apr 03 • Risk score shifted 57 to 63</div>
                                     <div className="rounded-xl border border-black/10 p-3">Apr 11 • Odometer anomaly confidence +12%</div>
                                 </div>
@@ -441,7 +417,7 @@ export function HomeExperience() {
             ticking = true;
             window.requestAnimationFrame(() => { updateStep(); ticking = false; });
         };
-        updateStep();
+        window.requestAnimationFrame(updateStep);
         window.addEventListener("scroll", onScroll, { passive: true });
         window.addEventListener("resize", updateStep);
         return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", updateStep); };
@@ -478,11 +454,14 @@ export function HomeExperience() {
                         onClick={scrollToApp}
                     >
                         <span>Get Started</span>
-                        <img
+                        <Image
                             src="/arrow-right.png"
                             alt=""
                             aria-hidden="true"
+                            width={20}
+                            height={20}
                             className="h-5 w-5 object-contain"
+                            unoptimized
                         />
                     </button>
 

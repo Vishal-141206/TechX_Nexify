@@ -1,10 +1,21 @@
 import joblib
 import os
+import pandas as pd
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "price_model.pkl")
 
 model = joblib.load(model_path)
+
+FEATURE_COLUMNS = [
+    "year",
+    "mileage_kmpl",
+    "engine_cc",
+    "owner_count",
+    "fuel_electric",
+    "fuel_petrol",
+    "transmission_manual",
+]
 
 def prepare_input(year, mileage, engine, owners, fuel, transmission):
 
@@ -22,5 +33,15 @@ def prepare_input(year, mileage, engine, owners, fuel, transmission):
         transmission_manual
     ]]
 
+
+def _to_model_input_frame(data):
+    if isinstance(data, pd.DataFrame):
+        return data
+
+    model_columns = list(getattr(model, "feature_names_in_", FEATURE_COLUMNS))
+    return pd.DataFrame(data, columns=model_columns)
+
+
 def predict_price(data):
-    return int(model.predict(data)[0])
+    input_frame = _to_model_input_frame(data)
+    return int(model.predict(input_frame)[0])

@@ -3,13 +3,6 @@
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 
-const comparison = [
-    { metric: "Risk Score", carA: "63 / 100", carB: "39 / 100" },
-    { metric: "Fraud Flags", carA: "2 warnings", carB: "No critical flags" },
-    { metric: "Damage Severity", carA: "Moderate", carB: "Low" },
-    { metric: "Maintenance Range", carA: "INR 20k - 60k", carB: "INR 12k - 28k" },
-];
-
 export default function ComparePage() {
     const router = useRouter();
     
