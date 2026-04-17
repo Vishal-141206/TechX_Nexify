@@ -220,11 +220,11 @@ function FrameOverlay({ currentFrame }: { currentFrame: number }) {
     const isLast = currentFrame === storyFrames.length - 1;
 
     return (
-        <div className="pointer-events-none relative min-h-[300px] md:min-h-[330px]">
+        <div className="pointer-events-none relative flex h-full min-h-[300px] items-center md:min-h-[330px]">
             <AnimatePresence>
                 <motion.div
                     key={frame.title}
-                    className="glass pointer-events-auto absolute inset-x-0 bottom-0 max-w-3xl rounded-2xl p-5 md:p-7"
+                    className="glass pointer-events-auto w-full max-w-3xl rounded-2xl p-5 md:p-7"
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.98 }}
@@ -345,28 +345,32 @@ export function HomeExperience() {
                 <div className="sticky top-0 h-screen overflow-hidden">
                     {/* ── CarSure branding (top-left) ── */}
                     <p
-                        className="absolute left-12 top-10 z-20"
-                        style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: "2.9rem", letterSpacing: "0.08em", color: "#111" }}
+                        className="orbitron-brand absolute left-12 top-10 z-20"
+                        style={{ fontSize: "2.9rem", letterSpacing: "0.08em", color: "#111" }}
                     >
                         CarSure
                     </p>
 
                     {/* ── ANALYSE shortcut (top-right) ── */}
                     <button
-                        className="absolute right-14 top-12 z-20 inline-flex cursor-pointer items-center gap-2 rounded-full border border-black/15 bg-white/70 px-5 py-2 text-s font-semibold text-black backdrop-blur transition hover:bg-black hover:text-white"
+                        className="group absolute right-14 top-12 z-20 inline-flex cursor-pointer items-center gap-2 rounded-full border border-black/15 bg-white/70 px-5 py-2 text-s font-semibold text-black backdrop-blur transition hover:bg-black hover:text-white"
                         onClick={scrollToApp}
                     >
                         <span>Get Started</span>
-                        <Image
-                            src="/arrow-right.png"
+                        <img
+                            src="/black-arrow.png"
                             alt=""
                             aria-hidden="true"
-                            width={20}
-                            height={20}
-                            className="h-5 w-5 object-contain"
-                            unoptimized
+                            className="h-5 w-5 object-contain group-hover:hidden"
+                        />
+                        <img
+                            src="/white-arrow.png"
+                            alt=""
+                            aria-hidden="true"
+                            className="hidden h-5 w-5 object-contain group-hover:block"
                         />
                     </button>
+
 
                     <AnimatePresence initial={false}>
                         {!showApp ? (
@@ -379,7 +383,7 @@ export function HomeExperience() {
                                 transition={{ duration: 0.4, ease: "easeInOut" }}
                             >
                                 <div className="pointer-events-none absolute inset-0">
-                                    <div className="mx-auto grid h-full w-[min(1180px,94vw)] grid-cols-1 items-end gap-4 px-3 pb-7 md:grid-cols-[1.15fr_0.85fr] md:pb-10">
+                                    <div className="mx-auto grid h-full w-[min(1180px,94vw)] grid-cols-1 items-center gap-4 px-3 md:grid-cols-[1.15fr_0.85fr]">
                                         <FrameOverlay currentFrame={currentFrame} />
                                         <NarrativeRail currentFrame={currentFrame} />
                                     </div>
@@ -434,7 +438,7 @@ export function HomeExperience() {
             </section>
 
             <div id="app-section">
-                    <AppSection />
+                <AppSection />
             </div>
         </div>
     );
