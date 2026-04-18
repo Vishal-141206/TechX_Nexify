@@ -1,18 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    AlertTriangle,
     Car,
+    ChevronLeft,
+    ChevronRight,
     ChevronDown,
     Gauge,
     History,
     LayoutDashboard,
     Settings,
-    ShieldAlert,
     ShieldCheck,
     Sparkles,
     MessageSquare,
@@ -77,110 +76,136 @@ const storyFrames: StoryFrame[] = [
 /* ─────────────────────── Combined App Section ─────────────────────── */
 
 function AppSection() {
-    const [activeTab, setActiveTab] = useState<"analyze" | "assistant">("analyze");
+    const [activeMenu, setActiveMenu] = useState<"analyze" | "dashboard" | "history" | "settings">("dashboard");
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+    useEffect(() => {
+        const media = window.matchMedia("(max-width: 1024px)");
+        const handleMedia = (event: MediaQueryListEvent) => {
+            setIsSidebarCollapsed(event.matches);
+        };
+
+        setIsSidebarCollapsed(media.matches);
+        media.addEventListener("change", handleMedia);
+        return () => media.removeEventListener("change", handleMedia);
+    }, []);
+
+    const menuItems: Array<{ key: "analyze" | "dashboard" | "history" | "settings"; label: string; Icon: LucideIcon }> = [
+        { key: "analyze", label: "Analyze Car", Icon: WandSparkles },
+        { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
+        { key: "history", label: "History", Icon: History },
+        { key: "settings", label: "Settings", Icon: Settings },
+    ];
 
     return (
-        <section id="app-section" className="mx-auto mt-20 max-w-7xl px-5 pb-20">
-            <div className="grid gap-4 rounded-3xl border border-black/10 bg-gray-50/80 p-4 backdrop-blur md:grid-cols-[240px_1fr]">
-                <aside className="glass rounded-2xl p-4 self-start sticky top-4">
-                    <h2 className="section-title mb-4 text-xl font-semibold text-black">CarSure AI</h2>
+        <section className="h-screen w-full px-3 py-4 md:px-6 md:py-6">
+            <div className="mx-auto flex h-full max-w-[1300px] rounded-3xl glass p-3 md:p-4">
+                <aside
+                    className={`relative flex h-full flex-col rounded-2xl glass p-3 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? "w-[70px]" : "w-[250px]"
+                        }`}
+                >
+                    <button
+                        type="button"
+                        onClick={() => setIsSidebarCollapsed((previous) => !previous)}
+                        className="absolute right-0 top-1/2 z-20 grid h-9 w-9 -translate-y-1/2 translate-x-1/2 place-items-center rounded-full border border-black/10 bg-white text-gray-700 shadow-md transition-all duration-300 hover:bg-black hover:text-white"
+                        aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    >
+                        {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                    </button>
+
+                    <div className={`mb-5 flex h-11 items-center ${isSidebarCollapsed ? "justify-center" : "gap-2.5"}`}>
+                        <div className="grid h-9 w-9 place-items-center rounded-xl border border-black/5 bg-black/[0.04] text-sm font-semibold text-[#2c3435]">
+                            CS
+                        </div>
+                        <h2
+                            className={`orbitron-brand overflow-hidden whitespace-nowrap text-xl font-semibold tracking-[0.05em] text-[#2c3435] transition-all duration-300 ${isSidebarCollapsed ? "max-w-0 opacity-0" : "max-w-[150px] opacity-100"
+                                }`}
+                        >
+                            CarSure
+                        </h2>
+                    </div>
+
                     <nav className="space-y-2 text-sm text-gray-700">
-                        <button onClick={() => setActiveTab("analyze")} className={`w-full flex items-center justify-start gap-2 rounded-lg px-3 py-2 transition-colors ${activeTab === "analyze" ? "bg-black/5 font-medium text-black" : "hover:bg-black/5"}`}>
-                            <WandSparkles size={16} /> Analyze Car
-                        </button>
-                        <button onClick={() => setActiveTab("assistant")} className={`w-full flex items-center justify-start gap-2 rounded-lg px-3 py-2 transition-colors ${activeTab === "assistant" ? "bg-black/5 font-medium text-black" : "hover:bg-black/5"}`}>
-                            <Sparkles size={16} /> AI Buying Assistant
-                        </button>
-                        {/* <Link href="/compare" scroll={false} className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 hover:bg-black/5 transition-colors">
-                            <Car size={16} /> Compare Cars
-                        </Link> */}
-                        <a className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 hover:bg-black/5 transition-colors" href="#history">
-                            <History size={16} /> History
-                        </a>
-                        <a className="flex items-center justify-start gap-2 rounded-lg px-3 py-2 hover:bg-black/5 transition-colors" href="#settings">
-                            <Settings size={16} /> Settings
-                        </a>
+                        {menuItems.map(({ key, label, Icon }) => {
+                            const isActive = activeMenu === key;
+
+                            return (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => setActiveMenu(key)}
+                                    className={`relative flex h-11 w-full items-center rounded-xl border transition-all duration-300 ease-in-out ${isSidebarCollapsed ? "justify-center px-0" : "justify-start px-3"
+                                        } ${isActive
+                                            ? "border-black/15 bg-black/[0.06] font-semibold text-black shadow-sm"
+                                            : "border-transparent bg-transparent text-gray-600 hover:border-black/10 hover:bg-black/[0.03] hover:text-black"
+                                        }`}
+                                >
+                                    <Icon size={18} />
+                                    <span
+                                        className={`overflow-hidden whitespace-nowrap pl-2.5 text-left transition-all duration-300 ${isSidebarCollapsed ? "max-w-0 opacity-0" : "max-w-[150px] opacity-100"
+                                            }`}
+                                    >
+                                        {label}
+                                    </span>
+                                </button>
+                            );
+                        })}
                     </nav>
                 </aside>
 
-                <main className="space-y-4">
-                    {activeTab === "analyze" ? (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-                            <div className="glass rounded-2xl p-6 text-center">
-                                <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-black/10 bg-black/[0.03]">
-                                    <WandSparkles size={28} className="text-black/50" />
-                                </div>
-                                <h3 className="section-title text-2xl font-semibold text-black">Analyze Car</h3>
-                                <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-                                    Enter full vehicle details — year, mileage, engine CC, owner count, fuel type,
-                                    transmission, and vehicle number — to get AI-powered pricing, risk scoring,
-                                    fraud detection, verification, and a buying recommendation.
-                                </p>
-                                <Link
-                                    href="/analyze"
-                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:bg-gray-800"
-                                >
-                                    <WandSparkles size={16} />
-                                    Start Full Analysis
-                                </Link>
-                            </div>
-
-                            <div className="grid gap-4 md:grid-cols-3">
-                                <div className="glass rounded-2xl p-5">
-                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 1</p>
-                                    <p className="mt-2 text-sm font-semibold text-black">Enter Vehicle Details</p>
-                                    <p className="mt-1 text-xs text-gray-500">Year, mileage, engine CC, owners, fuel type, transmission</p>
-                                </div>
-                                <div className="glass rounded-2xl p-5">
-                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 2</p>
-                                    <p className="mt-2 text-sm font-semibold text-black">AI Runs Analysis</p>
-                                    <p className="mt-1 text-xs text-gray-500">Price prediction, risk scoring, and fraud detection</p>
-                                </div>
-                                <div className="glass rounded-2xl p-5">
-                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Step 3</p>
-                                    <p className="mt-2 text-sm font-semibold text-black">Get AI Recommendation</p>
-                                    <p className="mt-1 text-xs text-gray-500">Clear buying advice based on all analysis data</p>
-                                </div>
-                            </div>
+                <main className="flex min-w-0 flex-1 flex-col gap-4 pl-3 transition-all duration-300 ease-in-out md:pl-4">
+                    <div className="glass flex min-h-[280px] flex-1 flex-col items-center justify-center rounded-2xl p-6 text-center md:p-8">
+                        <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-black/5 bg-black/[0.03]">
+                            {activeMenu === "analyze" ? <WandSparkles size={28} className="text-[#4c616c]" /> : <Gauge size={28} className="text-[#4c616c]" />}
                         </div>
-                    ) : (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-                            <div className="glass rounded-2xl p-6 text-center">
-                                <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-black/10 bg-black/[0.03]">
-                                    <Sparkles size={28} className="text-black/50" />
-                                </div>
-                                <h3 className="section-title text-2xl font-semibold text-black">AI Buying Assistant</h3>
-                                <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-                                    Not sure which car to buy? Just tell us your budget, family size, usage, and priority. Our AI will scan the market and evaluate the best fit utilizing reddit insights and ML pricing bounds.
-                                </p>
-                                <Link
-                                    href="/assistant"
-                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white transition hover:bg-gray-800"
-                                >
-                                    <Sparkles size={16} />
-                                    Launch AI Assistant
-                                </Link>
-                            </div>
+                        <h3 className="section-title text-3xl font-semibold text-[#2c3435]">
+                            {activeMenu === "analyze" ? "Analyze Car" : "Dashboard"}
+                        </h3>
+                        <p className="mx-auto mt-2 max-w-xl text-base leading-relaxed text-[#586162]">
+                            {activeMenu === "analyze"
+                                ? "Enter full vehicle details and run a technical analysis for pricing, risk, fraud, verification, and final buying recommendation."
+                                : "Run an analysis to see your results here. CarSure evaluates pricing, risk, fraud, verification, and generates an AI advisor recommendation."}
+                        </p>
+                        <Link
+                            href="/analyze"
+                            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-gray-800"
+                        >
+                            <WandSparkles size={16} />
+                            {activeMenu === "analyze" ? "Start Full Analysis" : "Go to Full Analysis"}
+                        </Link>
+                    </div>
 
-                            <div className="grid gap-4 md:grid-cols-3">
-                                <div className="glass rounded-2xl p-5">
-                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Phase 1</p>
-                                    <p className="mt-2 text-sm font-semibold text-black">Tell us your needs</p>
-                                    <p className="mt-1 text-xs text-gray-500">Set budget, family size, and driving preferences</p>
-                                </div>
-                                <div className="glass rounded-2xl p-5">
-                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Phase 2</p>
-                                    <p className="mt-2 text-sm font-semibold text-black">Recommendation</p>
-                                    <p className="mt-1 text-xs text-gray-500">LLM evaluates the dynamic active market catalog</p>
-                                </div>
-                                <div className="glass rounded-2xl p-5">
-                                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">Phase 3</p>
-                                    <p className="mt-2 text-sm font-semibold text-black">Insights Engine</p>
-                                    <p className="mt-1 text-xs text-gray-500">Reviews and extracts community verdict on top picks</p>
-                                </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                <Sparkles size={18} className="text-[#4c616c]" />
                             </div>
+                            <p className="text-2xl font-semibold text-[#2c3435]">AI Advisor</p>
+                            <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                Context-aware buying recommendation powered by analysis + verification data
+                            </p>
                         </div>
-                    )}
+
+                        <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                <ShieldCheck size={18} className="text-[#4c616c]" />
+                            </div>
+                            <p className="text-2xl font-semibold text-[#2c3435]">Verification</p>
+                            <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                Cross-check ownership, challans, and registration against official records
+                            </p>
+                        </div>
+
+                        <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                <Car size={18} className="text-[#4c616c]" />
+                            </div>
+                            <p className="text-2xl font-semibold text-[#2c3435]">Risk &amp; Fraud</p>
+                            <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                ML-powered risk scoring and fraud detection with confidence levels
+                            </p>
+                        </div>
+                    </div>
                 </main>
             </div>
         </section>
@@ -189,10 +214,10 @@ function AppSection() {
 
 /* ─────────────────────── Scroll Progress Bar ─────────────────────── */
 
-function ScrollProgressBar({ step }: { step: number }) {
+function ScrollProgressBar({ step, totalSteps }: { step: number; totalSteps: number }) {
     return (
         <div className="fixed right-4 top-1/2 z-50 -translate-y-1/2 flex flex-col items-center gap-1.5">
-            {Array.from({ length: 7 }, (_, i) => (
+            {Array.from({ length: totalSteps + 1 }, (_, i) => (
                 <motion.div
                     key={i}
                     className="rounded-full"
@@ -205,8 +230,8 @@ function ScrollProgressBar({ step }: { step: number }) {
                     transition={{ duration: 0.3, ease: "easeOut" }}
                 />
             ))}
-            <motion.p className="mt-2 text-[10px] font-medium tracking-wider text-gray-400" animate={{ opacity: step < 6 ? 1 : 0 }}>
-                {step}/6
+            <motion.p className="mt-2 text-[10px] font-medium tracking-wider text-gray-400" animate={{ opacity: step < totalSteps ? 1 : 0 }}>
+                {step}/{totalSteps}
             </motion.p>
         </div>
     );
@@ -220,31 +245,31 @@ function FrameOverlay({ currentFrame }: { currentFrame: number }) {
     const isLast = currentFrame === storyFrames.length - 1;
 
     return (
-        <div className="pointer-events-none relative flex h-full min-h-[300px] items-center md:min-h-[330px]">
-            <AnimatePresence>
+        <div className="pointer-events-none relative flex h-full min-h-[300px] items-center md:min-h-[330px]" style={{ perspective: "1200px" }}>
+            <AnimatePresence initial={false} mode="wait">
                 <motion.div
                     key={frame.title}
                     className="glass pointer-events-auto w-full max-w-3xl rounded-2xl p-5 md:p-7"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    initial={{ opacity: 0, scale: 0.85, rotateX: 10, y: 40 }}
+                    animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
+                    exit={{ opacity: 0, scale: 1.05, rotateX: -5, y: -20 }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 >
                     <div className="mb-4 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03]">
-                            <IconComponent size={20} className="text-black/60" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/5 bg-black/[0.03]">
+                            <IconComponent size={20} className="text-[#4c616c]" />
                         </div>
-                        <p className="inline-flex rounded-full border border-black/15 bg-white/60 px-4 py-1 text-xs uppercase tracking-[0.16em] text-gray-600">
+                        <p className="inline-flex rounded-full border border-black/5 bg-white/40 px-4 py-1 text-xs uppercase tracking-[0.16em] text-[#586162]">
                             {frame.badge}
                         </p>
                     </div>
-                    <h1 className="section-title text-balance text-3xl font-semibold leading-tight text-black sm:text-4xl md:text-5xl">
+                    <h1 className="section-title text-balance text-3xl font-semibold leading-tight text-[#2c3435] sm:text-4xl md:text-5xl">
                         {frame.title}
                     </h1>
-                    <p className="mt-3 max-w-2xl text-sm text-gray-600 sm:text-base md:text-lg">{frame.subtitle}</p>
-                    <p className="mt-2 max-w-xl text-xs leading-relaxed text-gray-400 sm:text-sm">{frame.detail}</p>
+                    <p className="mt-3 max-w-2xl text-sm text-[#586162] sm:text-base md:text-lg">{frame.subtitle}</p>
+                    <p className="mt-2 max-w-xl text-xs leading-relaxed text-[#747c7d] sm:text-sm">{frame.detail}</p>
                     {isLast && (
-                        <p className="mt-4 text-xs tracking-widest text-gray-400">↓ KEEP SCROLLING TO START ANALYSIS</p>
+                        <p className="mt-4 text-xs tracking-widest text-[#747c7d]">↓ KEEP SCROLLING TO START ANALYSIS</p>
                     )}
                 </motion.div>
             </AnimatePresence>
@@ -259,19 +284,19 @@ function NarrativeRail({ currentFrame }: { currentFrame: number }) {
         <aside className="pointer-events-none hidden justify-self-end md:block md:self-center md:translate-y-[2vh]">
             {/* <div className="glass rounded-2xl p-4"> */}
             {/* <p className="mb-3 text-xs uppercase tracking-[0.2em] text-gray-400">Scroll Narrative</p> */}
-            <ul className="grid h-[72vh] grid-rows-6 gap-3">
+            <ul className="grid h-[72vh] gap-3" style={{ gridTemplateRows: `repeat(${storyFrames.length}, minmax(0, 1fr))` }}>
                 {storyFrames.map((frame, index) => (
                     <motion.li
                         key={frame.badge}
-                        className="flex h-full flex-col justify-center overflow-hidden rounded-2xl border px-4 py-3.5"
+                        className="flex h-full flex-col justify-center overflow-hidden rounded-2xl glass px-4 py-3.5"
                         animate={{
-                            borderColor: currentFrame === index ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.08)",
-                            backgroundColor: currentFrame === index ? "rgba(0, 0, 0, 0.05)" : "rgba(0, 0, 0, 0.02)",
+                            opacity: currentFrame === index ? 1 : 0.4,
+                            scale: currentFrame === index ? 1 : 0.95
                         }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        <p className="text-sm uppercase tracking-[0.16em] text-gray-500">{frame.badge}</p>
-                        <p className="mt-1.5 text-sm leading-snug text-gray-700">{frame.subtitle}</p>
+                        <p className="text-sm uppercase tracking-[0.16em] text-[#586162]">{frame.badge}</p>
+                        <p className="mt-1.5 text-sm leading-snug text-[#2c3435]">{frame.subtitle}</p>
                     </motion.li>
                 ))}
             </ul>
@@ -286,6 +311,7 @@ export function HomeExperience() {
     const heroSectionRef = useRef<HTMLElement>(null);
     const [step, setStep] = useState(0);
     const stepRef = useRef(0);
+    const totalSteps = storyFrames.length;
 
     const updateStep = useCallback(() => {
         const section = heroSectionRef.current;
@@ -300,18 +326,18 @@ export function HomeExperience() {
         if (scrollY < sectionTop) {
             nextStep = 0;
         } else if (scrollY >= sectionTop + sectionHeight - viewportHeight) {
-            nextStep = 6;
+            nextStep = totalSteps;
         } else {
             const scrolled = Math.max(0, scrollY - sectionTop);
             nextStep = Math.floor(scrolled / viewportHeight);
-            nextStep = Math.min(6, Math.max(0, nextStep));
+            nextStep = Math.min(totalSteps, Math.max(0, nextStep));
         }
 
         if (stepRef.current !== nextStep) {
             stepRef.current = nextStep;
             setStep(nextStep);
         }
-    }, []);
+    }, [totalSteps]);
 
     useEffect(() => {
         let ticking = false;
@@ -327,7 +353,7 @@ export function HomeExperience() {
     }, [updateStep]);
 
     const currentFrame = Math.min(step, storyFrames.length - 1);
-    const showApp = step >= 6;
+    const showApp = step >= totalSteps;
 
     const scrollToApp = () => {
         const section = heroSectionRef.current;
@@ -338,7 +364,7 @@ export function HomeExperience() {
 
     return (
         <div className="relative">
-            <ScrollProgressBar step={step} />
+            <ScrollProgressBar step={step} totalSteps={totalSteps} />
 
             {/* ── Cinematic Scroll Section (700vh scroll trap) ── */}
             <section ref={heroSectionRef} className="relative" style={{ height: "700vh" }}>
@@ -397,18 +423,18 @@ export function HomeExperience() {
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.4, ease: "easeInOut" }}
                             >
-                                <div className="text-center absolute inset-0 flex flex-col items-center justify-center">
-                                    <p className="mb-3 inline-flex rounded-full border border-black/15 bg-black/5 px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-black">
+                                <div className="text-center absolute inset-0 flex flex-col items-center justify-center" style={{ perspective: "1000px" }}>
+                                    <p className="mb-3 inline-flex rounded-full px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-[#2c3435] glass">
                                         Analysis Ready
                                     </p>
-                                    <h2 className="section-title text-3xl font-bold text-black sm:text-4xl md:text-5xl">
+                                    <h2 className="section-title text-3xl font-bold text-[#2c3435] sm:text-4xl md:text-5xl">
                                         Let&apos;s Analyze Your Car
                                     </h2>
-                                    <p className="mx-auto mt-3 max-w-md text-sm text-gray-500 sm:text-base">
+                                    <p className="mx-auto mt-3 max-w-md text-sm text-[#586162] sm:text-base">
                                         Scroll down to start the AI analysis
                                     </p>
                                     <motion.div
-                                        className="mx-auto mt-6 h-8 w-[1px] bg-gradient-to-b from-black/40 to-transparent"
+                                        className="mx-auto mt-6 h-8 w-[1px] bg-gradient-to-b from-[#4c616c]/60 to-transparent"
                                         animate={{ opacity: [0.4, 1, 0.4] }}
                                         transition={{ duration: 2, repeat: Infinity }}
                                     />

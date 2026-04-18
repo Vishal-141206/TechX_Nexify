@@ -1,7 +1,7 @@
 {
   "name": "carsure",
   "version": "1.0.0",
-  "description": "CarSure AI immersive frontend prototype",
+  "description": "CarSure immersive frontend prototype",
   "private": true,
   "scripts": {
     "dev": "next dev",
