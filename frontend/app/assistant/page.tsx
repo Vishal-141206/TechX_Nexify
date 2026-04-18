@@ -75,7 +75,13 @@ const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localho
 
 /* ─── Shared Components ─── */
 
-function Field({ label, value, onChange, type = "text", min }: any) {
+function Field({ label, value, onChange, type = "text", min }: {
+    label: string;
+    value: string;
+    onChange: (val: string) => void;
+    type?: string;
+    min?: number | string;
+}) {
     return (
         <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-gray-700">{label}</label>
@@ -91,7 +97,12 @@ function Field({ label, value, onChange, type = "text", min }: any) {
     );
 }
 
-function SelectField({ label, value, onChange, options }: any) {
+function SelectField({ label, value, onChange, options }: {
+    label: string;
+    value: string;
+    onChange: (val: string) => void;
+    options: { label: string; value: string }[];
+}) {
     return (
         <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-gray-700">{label}</label>
@@ -100,7 +111,7 @@ function SelectField({ label, value, onChange, options }: any) {
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             >
-                {options.map((opt: any) => (
+                {options.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                         {opt.label}
                     </option>
@@ -146,8 +157,8 @@ export default function AnalyzePage() {
 
             const data = await res.json();
             setAnalysis(data as AnalyzeResponse);
-        } catch (err: any) {
-            setError(err.message || "An error occurred");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "An error occurred");
         } finally {
             setIsLoading(false);
         }
@@ -167,7 +178,7 @@ export default function AnalyzePage() {
                 </div>
                 <h1 className="section-title text-3xl md:text-4xl font-semibold text-black">Decision Dashboard</h1>
                 <p className="mt-3 max-w-xl mx-auto text-sm text-gray-600">
-                    Tell us your preferences. We'll score, compare, and decide — not just display.
+                    Tell us your preferences. We&apos;ll score, compare, and decide — not just display.
                 </p>
 
                 <form className="mt-8 space-y-5 text-left max-w-3xl mx-auto" onSubmit={(e) => e.preventDefault()}>

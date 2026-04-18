@@ -50,7 +50,16 @@ function formatAdvice(text: string) {
     });
 }
 
-function Field({ label, value, onChange, placeholder, type = "text", min, step, required = false }: any) {
+function Field({ label, value, onChange, placeholder, type = "text", min, step, required = false }: {
+    label: string;
+    value: string;
+    onChange: (val: string) => void;
+    placeholder: string;
+    type?: string;
+    min?: number;
+    step?: number;
+    required?: boolean;
+}) {
     return (
         <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-gray-700">
@@ -70,7 +79,13 @@ function Field({ label, value, onChange, placeholder, type = "text", min, step, 
     );
 }
 
-function SelectField({ label, value, onChange, options, required = false }: any) {
+function SelectField({ label, value, onChange, options, required = false }: {
+    label: string;
+    value: string;
+    onChange: (val: string) => void;
+    options: { label: string; value: string }[];
+    required?: boolean;
+}) {
     return (
         <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-gray-700">
@@ -82,7 +97,7 @@ function SelectField({ label, value, onChange, options, required = false }: any)
                 onChange={(e) => onChange(e.target.value)}
                 required={required}
             >
-                {options.map((opt: any) => (
+                {options.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                         {opt.label}
                     </option>
@@ -136,8 +151,8 @@ export default function AnalyzePage() {
                 reasons: Array.isArray(data.reasons) ? data.reasons : [],
                 ai_advice: data.ai_advice || "",
             });
-        } catch (err: any) {
-            setError(err.message || "An error occurred");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "An error occurred");
         } finally {
             setIsLoading(false);
         }

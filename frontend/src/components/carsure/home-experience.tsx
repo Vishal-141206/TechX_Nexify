@@ -87,7 +87,8 @@ function AppSection() {
             setIsSidebarCollapsed(event.matches);
         };
 
-        setIsSidebarCollapsed(media.matches);
+        requestAnimationFrame(() => setIsSidebarCollapsed(media.matches));
+        
         media.addEventListener("change", handleMedia);
         return () => media.removeEventListener("change", handleMedia);
     }, []);

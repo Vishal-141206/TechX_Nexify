@@ -139,17 +139,17 @@ TechX_Nexify/
 |       |-- formatter.py               # Price formatting utility
 |
 |-- frontend/
+|   |-- app/
+|   |   |-- globals.css            # Global styles and design tokens
+|   |   |-- layout.tsx             # Root layout (Plus Jakarta Sans font)
+|   |   |-- page.tsx               # Home page (imports home-experience)
+|   |   |-- analyze/
+|   |   |   |-- page.tsx           # Single vehicle diagnostic form + analysis stream
+|   |   |-- assistant/
+|   |   |   |-- page.tsx           # Decision Dashboard (multi-car comparison)
+|   |   |-- compare/
+|   |       |-- page.tsx           # Car comparison page
 |   |-- src/
-|   |   |-- app/
-|   |   |   |-- globals.css            # Global styles and design tokens
-|   |   |   |-- layout.tsx             # Root layout (Plus Jakarta Sans font)
-|   |   |   |-- page.tsx               # Home page (imports home-experience)
-|   |   |   |-- analyze/
-|   |   |   |   |-- page.tsx           # Single vehicle diagnostic form + analysis stream
-|   |   |   |-- assistant/
-|   |   |   |   |-- page.tsx           # Decision Dashboard (multi-car comparison)
-|   |   |   |-- compare/
-|   |   |       |-- page.tsx           # Car comparison page
 |   |   |-- components/
 |   |       |-- carsure/
 |   |           |-- home-experience.tsx # Cinematic scroll landing + story frames + app section
