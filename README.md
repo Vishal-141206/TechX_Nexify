@@ -1,4 +1,4 @@
-# CarSure AI
+# CarSure
 
 ### AI-Powered Car Risk Assessment, Decision System & Buying Advisor
 
