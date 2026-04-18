@@ -13,8 +13,10 @@ import {
     LayoutDashboard,
     Settings,
     ShieldCheck,
+    ShieldAlert,
     Sparkles,
     MessageSquare,
+    AlertTriangle,
     WandSparkles,
     type LucideIcon,
 } from "lucide-react";
@@ -156,56 +158,122 @@ function AppSection() {
                 <main className="flex min-w-0 flex-1 flex-col gap-4 pl-3 transition-all duration-300 ease-in-out md:pl-4">
                     <div className="glass flex min-h-[280px] flex-1 flex-col items-center justify-center rounded-2xl p-6 text-center md:p-8">
                         <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl border border-black/5 bg-black/[0.03]">
-                            {activeMenu === "analyze" ? <WandSparkles size={28} className="text-[#4c616c]" /> : <Gauge size={28} className="text-[#4c616c]" />}
+                            {activeMenu === "analyze" ? <WandSparkles size={28} className="text-[#4c616c]" /> : activeMenu === "dashboard" ? <LayoutDashboard size={28} className="text-[#4c616c]" /> : <Gauge size={28} className="text-[#4c616c]" />}
                         </div>
                         <h3 className="section-title text-3xl font-semibold text-[#2c3435]">
-                            {activeMenu === "analyze" ? "Analyze Car" : "Dashboard"}
+                            {activeMenu === "analyze" ? "Analyze Car" : activeMenu === "dashboard" ? "Decision Dashboard" : "Dashboard"}
                         </h3>
                         <p className="mx-auto mt-2 max-w-xl text-base leading-relaxed text-[#586162]">
                             {activeMenu === "analyze"
-                                ? "Enter full vehicle details and run a technical analysis for pricing, risk, fraud, verification, and final buying recommendation."
-                                : "Run an analysis to see your results here. CarSure evaluates pricing, risk, fraud, verification, and generates an AI advisor recommendation."}
+                                ? "Enter full vehicle details and run a technical analysis for pricing, risk, fraud classification, and AI buying recommendation."
+                                : activeMenu === "dashboard"
+                                    ? "Tell us your budget and lifestyle. We recommend the best cars, score them on Fit/Risk/Sentiment, explain why the best wins and why others lose."
+                                    : "Run an analysis to see your results here."}
                         </p>
                         <Link
-                            href="/analyze"
+                            href={activeMenu === "dashboard" ? "/assistant" : "/analyze"}
                             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-gray-800"
                         >
-                            <WandSparkles size={16} />
-                            {activeMenu === "analyze" ? "Start Full Analysis" : "Go to Full Analysis"}
+                            {activeMenu === "dashboard" ? <LayoutDashboard size={16} /> : <WandSparkles size={16} />}
+                            {activeMenu === "analyze" ? "Start Full Analysis" : activeMenu === "dashboard" ? "Open Decision Dashboard" : "Go to Analysis"}
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
-                                <Sparkles size={18} className="text-[#4c616c]" />
+                    {activeMenu === "analyze" ? (
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <Sparkles size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">AI Advisor</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    Context-aware buying recommendation from Groq LLM with rule-based fallback
+                                </p>
                             </div>
-                            <p className="text-2xl font-semibold text-[#2c3435]">AI Advisor</p>
-                            <p className="mt-1 text-sm leading-relaxed text-[#586162]">
-                                Context-aware buying recommendation powered by analysis + verification data
-                            </p>
-                        </div>
 
-                        <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
-                                <ShieldCheck size={18} className="text-[#4c616c]" />
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <ShieldAlert size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">3-Level Fraud</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    Cumulative signal classification: Clean, Suspicious, or High Risk
+                                </p>
                             </div>
-                            <p className="text-2xl font-semibold text-[#2c3435]">Verification</p>
-                            <p className="mt-1 text-sm leading-relaxed text-[#586162]">
-                                Cross-check ownership, challans, and registration against official records
-                            </p>
-                        </div>
 
-                        <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
-                                <Car size={18} className="text-[#4c616c]" />
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <Gauge size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">Risk Scoring</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    0-10 ML risk score evaluating age, usage, ownership, and mechanical patterns
+                                </p>
                             </div>
-                            <p className="text-2xl font-semibold text-[#2c3435]">Risk &amp; Fraud</p>
-                            <p className="mt-1 text-sm leading-relaxed text-[#586162]">
-                                ML-powered risk scoring and fraud detection with confidence levels
-                            </p>
                         </div>
-                    </div>
+                    ) : activeMenu === "dashboard" ? (
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <ShieldCheck size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">Fit Score Matrix</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    Each car scored 0-100 on profile match with side-by-side comparison grid
+                                </p>
+                            </div>
+
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <MessageSquare size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">Community Sentiment</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    HuggingFace RoBERTa sentiment from Reddit mapped to Positive / Neutral / Risk
+                                </p>
+                            </div>
+
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <AlertTriangle size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">Why-Not Engine</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    LLM-generated rejection reasons for every non-winning car recommendation
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <Sparkles size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">AI Powered</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    Groq LLM + HuggingFace Transformers driving all analysis pipelines
+                                </p>
+                            </div>
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <Gauge size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">ML Models</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    Trained scikit-learn models for price prediction and risk scoring
+                                </p>
+                            </div>
+                            <div className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl border border-black/5 bg-black/[0.03]">
+                                    <Car size={18} className="text-[#4c616c]" />
+                                </div>
+                                <p className="text-2xl font-semibold text-[#2c3435]">Data Driven</p>
+                                <p className="mt-1 text-sm leading-relaxed text-[#586162]">
+                                    Structured JSON outputs — no paragraphs, just comparable metrics
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </main>
             </div>
         </section>
