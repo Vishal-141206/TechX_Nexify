@@ -120,37 +120,50 @@ No guesswork. No assumptions. Just data.
 ## Project Structure
 
 ```
-CarSure/
-+-- backend/
-|   +-- main.py                    # FastAPI app with /analyze and /assistant endpoints
-|   +-- model/
-|   |   +-- predictor.py           # ML price prediction
-|   |   +-- price_model.pkl        # Trained model
-|   +-- services/
-|   |   +-- analysis.py            # Main orchestrator (analyze_car + run_assistant_pipeline)
-|   |   +-- risk_engine.py         # Risk scoring + fraud detection
-|   |   +-- recommendation.py      # LLM-powered car recommendation engine
-|   |   +-- reddit_service.py      # Reddit scraper + Groq summarizer
-|   |   +-- sentiment.py           # HuggingFace sentiment analysis
-|   |   +-- ai_advisor.py          # LLM + rule-based advisor
-|   +-- utils/
-|   |   +-- formatter.py           # Price formatting
-|   +-- requirements.txt
+TechX_Nexify/
 |
-+-- frontend/
-|   +-- src/
-|   |   +-- app/
-|   |   |   +-- page.tsx           # Home (cinematic scroll landing)
-|   |   |   +-- analyze/page.tsx   # Single vehicle diagnostic form + results
-|   |   |   +-- assistant/page.tsx # Decision Dashboard (multi-car comparison)
-|   |   |   +-- layout.tsx         # Root layout with Plus Jakarta Sans font
-|   |   +-- components/
-|   |       +-- carsure/
-|   |           +-- home-experience.tsx
-|   +-- package.json
-|   +-- tailwind.config.js
+|-- backend/
+|   |-- main.py                        # FastAPI app with /analyze and /assistant endpoints
+|   |-- requirements.txt               # Python dependencies
+|   |-- model/
+|   |   |-- predictor.py               # ML price prediction logic
+|   |   |-- price_model.pkl            # Trained scikit-learn model
+|   |-- services/
+|   |   |-- analysis.py                # Main orchestrator (analyze_car + run_assistant_pipeline)
+|   |   |-- risk_engine.py             # Risk scoring + 3-level fraud classification
+|   |   |-- recommendation.py          # LLM-powered car recommendation engine (used + new)
+|   |   |-- reddit_service.py          # Reddit scraper + Groq structured summarizer
+|   |   |-- sentiment.py               # HuggingFace sentiment analysis + label humanization
+|   |   |-- ai_advisor.py              # LLM + rule-based advisor for single car analysis
+|   |-- utils/
+|       |-- formatter.py               # Price formatting utility
 |
-+-- README.md
+|-- frontend/
+|   |-- src/
+|   |   |-- app/
+|   |   |   |-- globals.css            # Global styles and design tokens
+|   |   |   |-- layout.tsx             # Root layout (Plus Jakarta Sans font)
+|   |   |   |-- page.tsx               # Home page (imports home-experience)
+|   |   |   |-- analyze/
+|   |   |   |   |-- page.tsx           # Single vehicle diagnostic form + analysis stream
+|   |   |   |-- assistant/
+|   |   |   |   |-- page.tsx           # Decision Dashboard (multi-car comparison)
+|   |   |   |-- compare/
+|   |   |       |-- page.tsx           # Car comparison page
+|   |   |-- components/
+|   |       |-- carsure/
+|   |           |-- home-experience.tsx # Cinematic scroll landing + story frames + app section
+|   |-- public/
+|   |   |-- black-arrow.png            # UI arrow asset (default state)
+|   |   |-- white-arrow.png            # UI arrow asset (hover state)
+|   |-- package.json
+|   |-- tailwind.config.js
+|   |-- tsconfig.json
+|   |-- next.config.ts
+|   |-- postcss.config.js
+|   |-- eslint.config.mjs
+|
+|-- README.md
 ```
 
 ---
