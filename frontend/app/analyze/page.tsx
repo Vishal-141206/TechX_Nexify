@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bot, Gauge, ShieldAlert } from "lucide-react";
+import { API_URL } from "@/lib/api";
 
 type AnalyzeResponse = {
     price_range: string;
@@ -34,7 +35,7 @@ const INITIAL_FORM: FormState = {
     transmission: "Manual",
 };
 
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+// Removed BACKEND_BASE_URL to rely exclusively on API_URL
 
 function formatAdvice(text: string) {
     if (!text) return null;
@@ -123,7 +124,7 @@ export default function AnalyzePage() {
         setError(null);
         
         try {
-            const res = await fetch(`${BACKEND_BASE_URL}/analyze`, {
+            const res = await fetch(`${API_URL}/analyze`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

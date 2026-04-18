@@ -151,8 +151,10 @@ TechX_Nexify/
 |   |       |-- page.tsx           # Car comparison page
 |   |-- src/
 |   |   |-- components/
-|   |       |-- carsure/
-|   |           |-- home-experience.tsx # Cinematic scroll landing + story frames + app section
+|   |   |   |-- carsure/
+|   |   |       |-- home-experience.tsx # Cinematic scroll landing + story frames + app section
+|   |   |-- lib/
+|   |       |-- api.ts                 # Centralized API network configurations
 |   |-- public/
 |   |   |-- black-arrow.png            # UI arrow asset (default state)
 |   |   |-- white-arrow.png            # UI arrow asset (hover state)

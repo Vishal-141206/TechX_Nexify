@@ -1,8 +1,8 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Sparkles, TrendingUp, ShieldAlert, Activity, CheckCircle2, MessageSquare, AlertTriangle, XCircle, Gauge } from "lucide-react";
+import { API_URL } from "@/lib/api";
 
 /* ─── Types ─── */
 
@@ -71,7 +71,7 @@ const INITIAL_FORM: FormState = {
     car_condition: "used",
 };
 
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+// Removed BACKEND_BASE_URL to rely exclusively on API_URL
 
 /* ─── Shared Components ─── */
 
@@ -139,7 +139,7 @@ export default function AnalyzePage() {
         setError(null);
 
         try {
-            const res = await fetch(`${BACKEND_BASE_URL}/assistant`, {
+            const res = await fetch(`${API_URL}/assistant`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
